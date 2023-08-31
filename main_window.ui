@@ -1,0 +1,1812 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PairsTradingTerminal</class>
+ <widget class="QMainWindow" name="PairsTradingTerminal">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1384</width>
+    <height>987</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Pairs Trading Terminal</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../../../Downloads/icons8-cryptocurrency-48.png</normaloff>../../../Downloads/icons8-cryptocurrency-48.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="tabWidget">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>1381</width>
+      <height>971</height>
+     </rect>
+    </property>
+    <property name="layoutDirection">
+     <enum>Qt::LeftToRight</enum>
+    </property>
+    <property name="tabPosition">
+     <enum>QTabWidget::North</enum>
+    </property>
+    <property name="tabShape">
+     <enum>QTabWidget::Rounded</enum>
+    </property>
+    <property name="currentIndex">
+     <number>0</number>
+    </property>
+    <property name="elideMode">
+     <enum>Qt::ElideNone</enum>
+    </property>
+    <property name="tabsClosable">
+     <bool>false</bool>
+    </property>
+    <property name="movable">
+     <bool>false</bool>
+    </property>
+    <property name="tabBarAutoHide">
+     <bool>false</bool>
+    </property>
+    <widget class="QWidget" name="screen">
+     <property name="contextMenuPolicy">
+      <enum>Qt::PreventContextMenu</enum>
+     </property>
+     <attribute name="title">
+      <string>Screener</string>
+     </attribute>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>0</y>
+        <width>111</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Отобранные пары</string>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tableScreen">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>361</width>
+        <height>741</height>
+       </rect>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>0</height>
+       </size>
+      </property>
+      <column>
+       <property name="text">
+        <string>Pair</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Cointegr</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Stats</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Exchange</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="textGraphPair">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>0</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="scrPlot_5m" native="true">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>30</y>
+        <width>991</width>
+        <height>341</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="geometry">
+       <rect>
+        <x>390</x>
+        <y>780</y>
+        <width>761</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="title">
+       <string>Задать стратегию</string>
+      </property>
+      <widget class="QComboBox" name="strategyList">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>30</y>
+         <width>171</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>grid_1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pp_supertrend</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>bb3_atr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>st_dev</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>bb2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>manual</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>zscore</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QPushButton" name="setConfirm">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>171</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="palette">
+        <palette>
+         <active>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>184</red>
+             <green>184</green>
+             <blue>184</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </active>
+         <inactive>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>184</red>
+             <green>184</green>
+             <blue>184</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </inactive>
+         <disabled>
+          <colorrole role="Button">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>184</red>
+             <green>184</green>
+             <blue>184</blue>
+            </color>
+           </brush>
+          </colorrole>
+         </disabled>
+        </palette>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Set strategy</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLevelUp">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>40</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Level UP</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLevelDown">
+       <property name="geometry">
+        <rect>
+         <x>570</x>
+         <y>80</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Level DOWN</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textLookback">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>40</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Lookback</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textStop">
+       <property name="geometry">
+        <rect>
+         <x>390</x>
+         <y>80</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Stop</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="setLvlUp">
+       <property name="geometry">
+        <rect>
+         <x>670</x>
+         <y>40</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="setLvlDown">
+       <property name="geometry">
+        <rect>
+         <x>670</x>
+         <y>80</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="setLookback">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>40</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="setStopLoss">
+       <property name="geometry">
+        <rect>
+         <x>480</x>
+         <y>80</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>60</y>
+         <width>121</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Просигналить</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioButton_2">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>80</y>
+         <width>95</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Торговать</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_7">
+       <property name="geometry">
+        <rect>
+         <x>200</x>
+         <y>30</y>
+         <width>151</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Дейстивие по событию</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="openInTV">
+      <property name="geometry">
+       <rect>
+        <x>1152</x>
+        <y>0</y>
+        <width>211</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>open in TradingView</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="updRowScrnButton">
+      <property name="geometry">
+       <rect>
+        <x>340</x>
+        <y>10</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../../../Downloads/icons8-refresh-48.png</normaloff>../../../Downloads/icons8-refresh-48.png</iconset>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="scrPlot_2" native="true">
+      <property name="geometry">
+       <rect>
+        <x>380</x>
+        <y>390</y>
+        <width>991</width>
+        <height>361</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>780</y>
+        <width>141</width>
+        <height>111</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Show results</string>
+      </property>
+      <widget class="QRadioButton" name="radioScreen">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>96</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Raw results</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioScreen_2">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>40</y>
+         <width>96</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Hard results</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioScreen_3">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>60</y>
+         <width>96</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Touch BB</string>
+       </property>
+      </widget>
+      <widget class="QRadioButton" name="radioScreen_4">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>80</y>
+         <width>96</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>BB3_atr</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QLabel" name="textCoin1">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>790</y>
+        <width>211</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="textCoin2">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>820</y>
+        <width>211</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="screenNormalize">
+      <property name="geometry">
+       <rect>
+        <x>1000</x>
+        <y>0</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Normalize pair</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="trade">
+     <attribute name="title">
+      <string>Trading</string>
+     </attribute>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>310</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Открытые позиции</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>310</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Пары для отслеживания</string>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>820</y>
+        <width>631</width>
+        <height>121</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="title">
+       <string>Ручная торговля</string>
+      </property>
+      <widget class="QPushButton" name="stopButton">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>60</y>
+         <width>101</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Задать STOP</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonCloseLim">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>20</y>
+         <width>131</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>CLOSE (limit)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textPairTrade">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>20</y>
+         <width>221</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>9</pointsize>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="stopLoss">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>61</y>
+         <width>81</width>
+         <height>31</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="upLevel">
+       <property name="geometry">
+        <rect>
+         <x>540</x>
+         <y>20</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="downButton">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>40</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>DOWN level</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="downLevel">
+       <property name="geometry">
+        <rect>
+         <x>540</x>
+         <y>40</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="upButton">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>20</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>UP level</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonCloseMar">
+       <property name="geometry">
+        <rect>
+         <x>280</x>
+         <y>50</y>
+         <width>131</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>CLOSE (market)</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="textDrawdown">
+       <property name="geometry">
+        <rect>
+         <x>20</x>
+         <y>90</y>
+         <width>241</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ChangeStratBtn">
+       <property name="geometry">
+        <rect>
+         <x>540</x>
+         <y>90</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Change strat</string>
+       </property>
+      </widget>
+      <widget class="QComboBox" name="strategyList_2">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>90</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>10</pointsize>
+        </font>
+       </property>
+       <item>
+        <property name="text">
+         <string>grid_1</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pp_supertrend</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>bb3_atr</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>st_dev</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>bb2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>manual</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>zscore</string>
+        </property>
+       </item>
+      </widget>
+      <widget class="QLineEdit" name="newLookbacktxt_2">
+       <property name="geometry">
+        <rect>
+         <x>540</x>
+         <y>60</y>
+         <width>81</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="newLookbackBtn_2">
+       <property name="geometry">
+        <rect>
+         <x>430</x>
+         <y>60</y>
+         <width>101</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>New look-k</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QTableWidget" name="tradingOpenPos">
+      <property name="geometry">
+       <rect>
+        <x>730</x>
+        <y>340</y>
+        <width>631</width>
+        <height>471</height>
+       </rect>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustIgnored</enum>
+      </property>
+      <column>
+       <property name="text">
+        <string>Pair</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Open</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Dir-on</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>PnL</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Stop</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Up</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Down</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Strategy</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Lookback</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID_1</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>ID_2</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>size_1</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>size_2</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Exchange</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QLabel" name="textGraphPair_2">
+      <property name="geometry">
+       <rect>
+        <x>70</x>
+        <y>10</y>
+        <width>331</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QTableWidget" name="tradingForCheck">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>340</y>
+        <width>711</width>
+        <height>471</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>Pair</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Up</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Down</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Coint</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Statio</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>% out</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Strat</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Exchange</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>lookb-k</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Action</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="PlotWidget" name="plotWidget" native="true">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>1361</width>
+        <height>281</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="openInTVtrading">
+      <property name="geometry">
+       <rect>
+        <x>1160</x>
+        <y>0</y>
+        <width>211</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>open in TradingView</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="updateOpenButton">
+      <property name="geometry">
+       <rect>
+        <x>1330</x>
+        <y>320</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../../../Downloads/icons8-refresh-48.png</normaloff>../../../Downloads/icons8-refresh-48.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="updateCheckButton">
+      <property name="geometry">
+       <rect>
+        <x>670</x>
+        <y>320</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="whatsThis">
+       <string/>
+      </property>
+      <property name="text">
+       <string extracomment="sdfsdfsdfsf"/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../../../Downloads/icons8-refresh-48.png</normaloff>../../../Downloads/icons8-refresh-48.png</iconset>
+      </property>
+     </widget>
+     <widget class="QGroupBox" name="groupBox_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>820</y>
+        <width>711</width>
+        <height>121</height>
+       </rect>
+      </property>
+      <property name="title">
+       <string>Для отслеживания</string>
+      </property>
+      <property name="flat">
+       <bool>false</bool>
+      </property>
+      <widget class="QPushButton" name="upButtonCheck">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>30</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>UP level</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="upLvlCheck">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="downLvlCheck">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>50</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="downButtonCheck">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>50</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>DOWN lvl</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="deletePairButton">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>30</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="autoFillBackground">
+        <bool>true</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">color: rgb(255, 0, 0);</string>
+       </property>
+       <property name="text">
+        <string>Delete</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../Downloads/icons8-удалить-48.png</normaloff>../../../Downloads/icons8-удалить-48.png</iconset>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="posSize">
+       <property name="geometry">
+        <rect>
+         <x>640</x>
+         <y>20</y>
+         <width>61</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_5">
+       <property name="geometry">
+        <rect>
+         <x>590</x>
+         <y>20</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Size ($)</string>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonLongLim">
+       <property name="geometry">
+        <rect>
+         <x>460</x>
+         <y>50</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>LONG (limit)</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../Downloads/icons8-up-green.png</normaloff>../../../Downloads/icons8-up-green.png</iconset>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonShortLim">
+       <property name="geometry">
+        <rect>
+         <x>580</x>
+         <y>50</y>
+         <width>121</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>SHORT (limit)</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../Downloads/icons8-down-red-16.png</normaloff>../../../Downloads/icons8-down-red-16.png</iconset>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonShortMar">
+       <property name="geometry">
+        <rect>
+         <x>580</x>
+         <y>80</y>
+         <width>121</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>SHORT (market)</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../Downloads/icons8-down-red-16.png</normaloff>../../../Downloads/icons8-down-red-16.png</iconset>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ButtonLongMar">
+       <property name="geometry">
+        <rect>
+         <x>460</x>
+         <y>80</y>
+         <width>111</width>
+         <height>31</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>LONG (market)</string>
+       </property>
+       <property name="icon">
+        <iconset>
+         <normaloff>../../../Downloads/icons8-up-green.png</normaloff>../../../Downloads/icons8-up-green.png</iconset>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="ChangeActionBtn">
+       <property name="geometry">
+        <rect>
+         <x>250</x>
+         <y>30</y>
+         <width>101</width>
+         <height>28</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Change action</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="newLookbacktxt">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>70</y>
+         <width>51</width>
+         <height>21</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="newLookbackBtn">
+       <property name="geometry">
+        <rect>
+         <x>60</x>
+         <y>70</y>
+         <width>71</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>New look-k</string>
+       </property>
+      </widget>
+     </widget>
+     <widget class="QPushButton" name="newStatsButton">
+      <property name="geometry">
+       <rect>
+        <x>630</x>
+        <y>320</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../../../Downloads/icons8-update-16.png</normaloff>../../../Downloads/icons8-update-16.png</iconset>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="sortName">
+      <property name="geometry">
+       <rect>
+        <x>1300</x>
+        <y>320</y>
+        <width>31</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="icon">
+       <iconset>
+        <normaloff>../../../Downloads/icons8-нумерованный-список-48.png</normaloff>../../../Downloads/icons8-нумерованный-список-48.png</iconset>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="tradeNormalize">
+      <property name="geometry">
+       <rect>
+        <x>1020</x>
+        <y>0</y>
+        <width>131</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Normalize pair</string>
+      </property>
+     </widget>
+     <zorder>groupBox</zorder>
+     <zorder>label_3</zorder>
+     <zorder>label_4</zorder>
+     <zorder>tradingOpenPos</zorder>
+     <zorder>textGraphPair_2</zorder>
+     <zorder>tradingForCheck</zorder>
+     <zorder>plotWidget</zorder>
+     <zorder>openInTVtrading</zorder>
+     <zorder>updateOpenButton</zorder>
+     <zorder>updateCheckButton</zorder>
+     <zorder>groupBox_3</zorder>
+     <zorder>newStatsButton</zorder>
+     <zorder>sortName</zorder>
+     <zorder>tradeNormalize</zorder>
+    </widget>
+    <widget class="QWidget" name="analyze">
+     <attribute name="title">
+      <string>Analytics</string>
+     </attribute>
+     <widget class="QTableWidget" name="tableResults">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>60</y>
+        <width>381</width>
+        <height>741</height>
+       </rect>
+      </property>
+      <column>
+       <property name="text">
+        <string>Pair</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>PnL(%)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Plan(%)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Profit</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Open(date)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Close(date)</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Open</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Close</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Lookback</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Strategy</string>
+       </property>
+      </column>
+     </widget>
+     <widget class="QDateEdit" name="dateFrom">
+      <property name="geometry">
+       <rect>
+        <x>120</x>
+        <y>10</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QDateEdit" name="dateTo">
+      <property name="geometry">
+       <rect>
+        <x>240</x>
+        <y>10</y>
+        <width>91</width>
+        <height>22</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_6">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>10</y>
+        <width>111</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Показать сделки с </string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_8">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>10</y>
+        <width>21</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>по</string>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="UpdateBtn">
+      <property name="geometry">
+       <rect>
+        <x>330</x>
+        <y>10</y>
+        <width>61</width>
+        <height>41</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Update</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="total_txt">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>810</y>
+        <width>231</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Total PnL:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="resPlotPair" native="true">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>40</y>
+        <width>961</width>
+        <height>341</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="PlotWidget" name="resPlotSingle" native="true">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>390</y>
+        <width>961</width>
+        <height>361</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="textResPair">
+      <property name="geometry">
+       <rect>
+        <x>400</x>
+        <y>10</y>
+        <width>331</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="openInTVresult">
+      <property name="geometry">
+       <rect>
+        <x>1150</x>
+        <y>10</y>
+        <width>211</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>open in TradingView</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="negative_txt">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>850</y>
+        <width>231</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Total PnL:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QLabel" name="positive_txt">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>870</y>
+        <width>231</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Total PnL:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="UpdatePlanBtn">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>810</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Update plan PnL</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="plan_txt">
+      <property name="geometry">
+       <rect>
+        <x>160</x>
+        <y>830</y>
+        <width>231</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <weight>50</weight>
+        <bold>false</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::RightToLeft</enum>
+      </property>
+      <property name="text">
+       <string>Total PnL:</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="strategyList_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>91</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <item>
+       <property name="text">
+        <string>---</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>grid_1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>pp_supertrend</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>bb3_atr</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>st_dev</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>bb2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>manual</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>zscore</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="set">
+     <attribute name="title">
+      <string>Settings</string>
+     </attribute>
+    </widget>
+   </widget>
+  </widget>
+  <action name="action1">
+   <property name="text">
+    <string>1</string>
+   </property>
+  </action>
+  <action name="action2">
+   <property name="text">
+    <string>2</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QWidget</extends>
+   <header>pyqtgraph</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
