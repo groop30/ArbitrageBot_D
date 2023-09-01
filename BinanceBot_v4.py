@@ -42,6 +42,7 @@ def open_position(action, pair, coin1, coin2, strategy, going_to, l_price, p_siz
 
 
 def h1_permission(df_1h, no_stop=True):
+
     denied = 'trade'
     last_1h = df_1h.tail(2)
     # По тф 1Н смотрим только последнюю полностью сформированную свечу
@@ -121,29 +122,43 @@ def update_pnl():
             for c in close_df
             if c in ["coin1_id", "coin2_id", "pair", "coin1", "coin2", "going_to", "price", "c1_op_price", "c2_op_price"]
         )
-        last_price1, last_price2, l_price = modul.get_last_spread_price(coin1, coin2, connection)
 
-        if going_to == 'UP':
-            if (c1_op_price is not None and c1_op_price > 0.0) and (c2_op_price is not None and c2_op_price > 0.0):
-                coin1_res_perc = (last_price1 - c1_op_price) / c1_op_price * 100
-                coin2_res_perc = (c2_op_price - last_price2) / c2_op_price * 100
-                result_per = coin1_res_perc + coin2_res_perc
+        single_trade = False
+        if pd.isna(coin2):
+            single_trade = True
+
+        if single_trade:
+            coin_df = modul.get_last_price(coin1)
+            last_price = coin_df.iloc[0]['bid']
+            if going_to == 'UP':
+                result_per = (last_price - c1_op_price) / c1_op_price * 100
             else:
-                result = l_price - op_price
-                result_per = round(result / op_price * 100, 3)
+                result_per = (c1_op_price - last_price) / c1_op_price * 100
         else:
-            if (c1_op_price is not None and c1_op_price > 0.0) and (c2_op_price is not None and c2_op_price > 0.0):
-                coin1_res_perc = (c1_op_price - last_price1) / c1_op_price * 100
-                coin2_res_perc = (last_price2 - c2_op_price) / c2_op_price * 100
-                result_per = coin1_res_perc + coin2_res_perc
+            last_price1, last_price2, l_price = modul.get_last_spread_price(coin1, coin2, connection)
+
+            if going_to == 'UP':
+                if (c1_op_price is not None and c1_op_price > 0.0) and (c2_op_price is not None and c2_op_price > 0.0):
+                    coin1_res_perc = (last_price1 - c1_op_price) / c1_op_price * 100
+                    coin2_res_perc = (c2_op_price - last_price2) / c2_op_price * 100
+                    result_per = coin1_res_perc + coin2_res_perc
+                else:
+                    result = l_price - op_price
+                    result_per = round(result / op_price * 100, 3)
             else:
-                result = op_price - l_price
-                result_per = round(result / op_price * 100, 3)
+                if (c1_op_price is not None and c1_op_price > 0.0) and (c2_op_price is not None and c2_op_price > 0.0):
+                    coin1_res_perc = (c1_op_price - last_price1) / c1_op_price * 100
+                    coin2_res_perc = (last_price2 - c2_op_price) / c2_op_price * 100
+                    result_per = coin1_res_perc + coin2_res_perc
+                else:
+                    result = op_price - l_price
+                    result_per = round(result / op_price * 100, 3)
 
         modul.update_closedf(connection, coin1_id, 'pnl', str(result_per))
 
 
 def cut_tails():
+
     tails1 = modul.find_lost_trades(connection, True, 'Binance')
     tails2 = modul.find_lost_trades(connection, True, 'Binance2')
     if len(tails1) > 0:
@@ -163,7 +178,7 @@ def cut_tails():
         else:
             side = 'sell'
             l_price = price_df.iloc[0]['ask']
-        usd_size = l_price * size
+        usd_size = l_price*size
         if usd_size < 10.0:
             # недостаточно для ордера, смотрим, последний или нет.
             plan_size = tails.iloc[index]['size']
@@ -181,6 +196,7 @@ def cut_tails():
 
 
 def check_for_open():
+
     # если баланс недостаточен - нет смысла смотреть дальше
     balance = modul.enough_balance()
     if balance < 10.0:
@@ -236,16 +252,16 @@ def check_for_open():
         l_time = datetime.datetime.now()
         last_row = df.tail(2)
         # получим данные последней строки
-        l_price, l_zscore, l_bb_up, l_sma, l_bb_down = (
+        l_price, l_bb_up, l_sma, l_bb_down = (
             last_row[c].to_numpy()[1]
             for c in last_row
-            if c in ["close", "zscore", "bb_up", "sma", "bb_down"]
+            if c in ["close", "bb_up", "sma", "bb_down"]
         )
         # получим данные предпоследней строки (последняя сформированная свеча)
-        pre_high, pre_low, pre_price, pre_zscore, pre_bb_up, pre_sma, pre_bb_down = (
+        pre_high, pre_low, pre_price, pre_bb_up, pre_sma, pre_bb_down = (
             last_row[c].to_numpy()[0]
             for c in last_row
-            if c in ["high", "low", "close", "zscore", "bb_up", "sma", "bb_down"]
+            if c in ["high", "low", "close", "bb_up", "sma", "bb_down"]
         )
 
         ########################################
@@ -253,7 +269,6 @@ def check_for_open():
         # подготовим данные для дальнейшего анализа
         l_diff = l_price - l_sma
         l_diff_per = l_diff / l_price * 100
-        zsc_diff = l_zscore - pre_zscore
 
         if strategy == 'manual':
             if opened_positions > 0:
@@ -324,6 +339,10 @@ def check_for_open():
                 if -0.6 < l_diff_per < 0.6:
                     continue
                 # для zscore вход при начале уменьшения zsc, если он уже зашел за уровень
+                df = modul.zscore_calculating(df, lookback)
+                l_zscore = df.iloc[-1]['zscore']
+                pre_zscore = df.iloc[-2]['zscore']
+                zsc_diff = l_zscore - pre_zscore
                 if l_zscore < down:
                     if zsc_diff > 0.2:
                         # zsc начал увеличиваться, пора заходить
@@ -458,6 +477,7 @@ def check_for_open():
 
 
 def open_one_time_positions():
+
     # если баланс недостаточен - нет смысла смотреть дальше
     balance = modul.enough_balance()
     if balance < 10.0:
@@ -511,7 +531,7 @@ def check_for_close():
     # анализируем открытые позиции, ищем ситуации для усреднения или для закрытия
     for index in range(len(close_df)):
         # получим данные строки
-        coin1_id, coin2_id, pair, coin1, coin2, going_to, op_price, stop, size1, size2, strategy, lookback, up, down, exchange = (
+        coin1_id, coin2_id, pair, coin1, coin2, going_to, op_price, stop,  size1, size2, strategy, lookback, up, down, exchange = (
             close_df[c].to_numpy()[index]
             for c in close_df
             if c in ["coin1_id", "coin2_id", "pair", "coin1", "coin2", "going_to", "price", "stop",
@@ -522,8 +542,8 @@ def check_for_close():
             lookback = 50
 
         single_trade = False
-        if coin2_id == '':
-            single_trade = True
+        if pd.isna(coin2_id):
+           single_trade = True
 
         if single_trade:
             coin1_df = modul.get_last_price(coin1)
@@ -590,36 +610,36 @@ def check_for_close():
             if going_to == 'DOWN':
                 if l_price < l_sma and opened_positions <= 2:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price < bb_down_1 and opened_positions > 2:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price > stop != 0.0:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
                 # elif (l_price - op_price)/op_price*100 > stop_per:
                 elif (l_price - l_sma) / l_sma * 100 > stop_per:
                     new_row['stop'] = stop_per
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
             else:
                 if l_price > l_sma and opened_positions <= 2:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price > bb_up_1 and opened_positions > 2:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price < stop != 0.0:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
                 # elif (op_price-l_price)/op_price*100 > stop_per:
                 elif (l_sma - l_price) / l_sma * 100 > stop_per:
                     new_row['stop'] = stop_per
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
         elif strategy == 'bb3_atr':
             df['bb_up_4'], _, df['bb_down_4'] = talib.BBANDS(df.close, lookback, 4.2, 4.2, 0)
@@ -650,50 +670,52 @@ def check_for_close():
             if going_to == 'DOWN':
                 if l_price < l_center:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price > stop != 0.0:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
             else:
                 if l_price > l_center:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                 elif l_price < stop != 0.0:
                     modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price,
-                                              new_row, exchange)
+                                              new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
         elif strategy == 'pp_supertrend':
             if going_to == 'DOWN':
                 if stop < l_price:
-                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, exchange)
+                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
                     df = modul.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'down']
                     if len(check_df) > 1:
-                        if stop > check_df.iloc[-1]['trend']:
-                            stop = check_df.iloc[-1]['trend']
-                            modul.update_orders_df(connection, coin1_id, 'stop', stop)
+                        check_level = round(check_df.iloc[-1]['trend'], 7)
+                        if stop > check_level:
+                            stop = check_level
+                            modul.update_closedf(connection, coin1_id, 'stop', stop)
             else:
                 if stop > l_price:
-                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, exchange)
+                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
                     df = modul.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'up']
                     if len(check_df) > 1:
-                        if stop < check_df.iloc[-1]['trend']:
-                            stop = check_df.iloc[-1]['trend']
-                            modul.update_orders_df(connection, coin1_id, 'stop', stop)
+                        check_level = round(check_df.iloc[-1]['trend'], 7)
+                        if stop < check_level:
+                            stop = check_level
+                            modul.update_closedf(connection, coin1_id, 'stop', stop)
         else:
             # Общее правило закрытия, используется, если для стратегии не прописано отдельных условий выше
             if going_to == 'UP':
                 if (l_price > l_sma) | (stop != 0.0 and l_price < stop):
-                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, exchange)
+                    modul.close_pair_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
             elif going_to == 'DOWN':
                 if (l_price < l_sma) | (stop != 0.0 and l_price > stop):
-                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, exchange)
+                    modul.close_pair_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
 
 
 # schedule.every(15).seconds.do(check_for_close)

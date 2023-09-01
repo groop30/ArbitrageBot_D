@@ -2,25 +2,25 @@ import datetime
 import pandas as pd
 import time
 import bin_utils as modul
-import talib
-import numpy as np
+# import talib
+# import numpy as np
 
 pd.options.mode.chained_assignment = None
 tf_5m = 5 * 60
 tf_5m_str = '5m'
-pos_size = 100.0
+pos_size = 20.0
 connection = modul.connect_to_sqlalchemy_binance()
 alerts = []
 
 
 def open_position(action, coin, strategy, going_to, l_price, lookback, stop, limit, this_time):
-    if action == "signal":
+    if "signal" in action:
         if coin not in alerts:
             modul.send_message_to_telegram(
                 f'BINANCE:{coin}.P- сигнал на вход {going_to}, цена={l_price}, '
                 f'https://www.tradingview.com/chart/?symbol=BINANCE:{coin}.P', 2)
             alerts.append(coin)
-    else:
+    if "trade" in action:
         print(f'{coin}-открываем позицию {strategy},{going_to}, цена={l_price}, в {this_time}')
         modul.open_single_position(connection, coin, going_to, pos_size, lookback, stop, limit, strategy, True, 'Binance2')
 
@@ -28,9 +28,11 @@ def open_position(action, coin, strategy, going_to, l_price, lookback, stop, lim
 def check_for_open():
     # если баланс недостаточен - нет смысла смотреть дальше
     balance = modul.enough_balance("Binance2")
-    if balance < 5.0:
-        print(f'недостаточно средств на балансе = {balance}')
-        return False
+    action = "signal, trade"
+    if balance < 3.0:
+        # print(f'недостаточно средств на балансе = {balance}')
+        # return False
+        action = "signal"
 
     # all_futures = modul.get_all_futures()
     all_futures = ['1000LUNCUSDT', '1000PEPEUSDT', '1000SHIBUSDT', '1INCHUSDT', 'AAVEUSDT',
@@ -118,7 +120,7 @@ def check_for_open():
                 if len(check_df) > 1:
                     if trend_start > check_df.iloc[-2]['trend']:
                         if (history_df.iloc[-2]['trend'] - trend_start) / trend_start > 0.005:
-                            open_position("signal", future, strategy, 'UP', l_price, 0, trend_start, True, l_time)
+                            open_position(action, future, strategy, 'UP', l_price, 0, round(trend_start, 7), True, l_time)
 
             else:
                 # переключились на растущий тренд, смотрим два предыдущих
@@ -127,7 +129,7 @@ def check_for_open():
                 if len(check_df) > 1:
                     if trend_start < check_df.iloc[-2]['trend']:
                         if (trend_start - history_df.iloc[-2]['trend']) / history_df.iloc[-2]['trend'] > 0.005:
-                            open_position("signal", future, strategy, 'DOWN', l_price, 0, trend_start, True, l_time)
+                            open_position(action, future, strategy, 'DOWN', l_price, 0, round(trend_start, 7), True, l_time)
 
         ########################################
         # Проверим, удалять ли из списка?

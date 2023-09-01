@@ -55,16 +55,17 @@ TELEGRAM_CHANNEL = key.TELEGRAM_CHANNEL
 
 
 def send_message_to_telegram(text, channel):
+
     if channel == 1:
         try:
             requests.get('https://api.telegram.org/bot{}/sendMessage'.format(TELEGRAM_TOKEN), params=dict(
-                chat_id='@blackbullssignals', text=text))
+                         chat_id='@blackbullssignals', text=text))
         except ValueError:
             print(f'Не получилась отправка сообщения в Telegram - {text}')
     elif channel == 2:
         try:
             requests.get('https://api.telegram.org/bot{}/sendMessage'.format(key.team2_alerts_bot), params=dict(
-                chat_id='@team2alerts', text=text))
+                         chat_id='@team2alerts', text=text))
         except ValueError:
             print(f'Не получилась отправка сообщения в Telegram - {text}')
 
@@ -155,6 +156,7 @@ def create_check_table(connect):
 
 
 def create_orders_table(connect):
+
     meta = sql.MetaData()
     orders_table = sql.Table(
         'orders_log', meta,
@@ -193,18 +195,20 @@ def create_orders_table(connect):
 
 
 def update_closedf(connection, coin_id, field_name, q_value):
+    idd = int(coin_id)
     close_table = create_close_table(connection)
     if field_name == 'up':
-        query = close_table.update().where(close_table.columns.coin1_id == int(coin_id)).values(up=bindparam('u_name'))
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(up=bindparam('u_name'))
     elif field_name == 'down':
-        query = close_table.update().where(close_table.columns.coin1_id == int(coin_id)).values(down=bindparam('u_name'))
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(down=bindparam('u_name'))
     elif field_name == 'pnl':
-        query = close_table.update().where(close_table.columns.coin1_id == int(coin_id)).values(
-            pnl=bindparam('u_name'))
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(pnl=bindparam('u_name'))
     elif field_name == 'lookback':
-        query = close_table.update().where(close_table.columns.coin1_id == int(coin_id)).values(lookback=bindparam('u_name'))
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(lookback=bindparam('u_name'))
+    elif field_name == 'stop':
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(stop=bindparam('u_name'))
     else:
-        query = close_table.update().where(close_table.columns.coin1_id == int(coin_id)).values(stop=bindparam('u_name'))
+        query = close_table.update().where(close_table.columns.coin1_id == idd).values(stop=bindparam('u_name'))
 
     q_value = str(q_value)
     q_value = q_value.replace(',', '.')
@@ -275,28 +279,18 @@ def update_orders_df(connection, idd, field_name, q_value):
     # base = orders_table.update().where(orders_table.columns.coin1_id == idd)
     if field_name == 'close_order':
         values = {
-            orders_table.columns.op_price: bindparam('u_op_price'),
-            orders_table.columns.cl_price: bindparam('u_cl_price'),
-            orders_table.columns.cl_time: bindparam('u_cl_time'),
-            orders_table.columns.stop: bindparam('u_stop'),
-            orders_table.columns.result: bindparam('u_result'),
-            orders_table.columns.result_perc: bindparam('u_result_per'),
-            orders_table.columns.per_no_commis: bindparam('u_per_no_commis'),
-            orders_table.columns.commis: bindparam('u_commis')
-        }
+                orders_table.columns.op_price: bindparam('u_op_price'),
+                orders_table.columns.cl_price: bindparam('u_cl_price'),
+                orders_table.columns.cl_time: bindparam('u_cl_time'),
+                orders_table.columns.stop: bindparam('u_stop'),
+                orders_table.columns.result: bindparam('u_result'),
+                orders_table.columns.result_perc: bindparam('u_result_per'),
+                orders_table.columns.per_no_commis: bindparam('u_per_no_commis'),
+                orders_table.columns.commis: bindparam('u_commis')
+                }
         query = orders_table.update().where(orders_table.columns.coin1_id == idd).values(values)
-        # query1 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(op_price=bindparam('u_op_price'))
-        # query2 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(cl_price=bindparam('u_cl_price'))
-        # query3 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(cl_time=bindparam('u_cl_time'))
-        # query4 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(stop=bindparam('u_stop'))
-        # query5 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(result=bindparam('u_result'))
-        # query6 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(result_perc=bindparam('u_result_per'))
-        # query7 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(per_no_commis=bindparam('u_per_no_commis'))
-        # query8 = orders_table.update().where(orders_table.columns.coin1_id == idd).values(commis=bindparam('u_commis'))
     elif field_name == 'plan_profit':
         query = orders_table.update().where(orders_table.columns.coin1_id == idd).values(plan_profit=bindparam('u_name'))
-    elif field_name == 'stop':
-        query = orders_table.update().where(orders_table.columns.coin1_id == idd).values(stop=bindparam('u_name'))
     else:
         query = orders_table.update().where(orders_table.columns.coin1_id == idd).values(up=bindparam('u_name'))
 
@@ -312,19 +306,10 @@ def update_orders_df(connection, idd, field_name, q_value):
             commis = float(q_value['commis'])
             conn.execute(query, u_op_price=op_price, u_cl_price=cl_price, u_cl_time=cl_time, u_stop=stop,
                          u_result=result, u_result_per=result_perc, u_per_no_commis=per_no_commis, u_commis=commis)
-            # conn.execute(query1, u_op_price=float(op_price))
-            # conn.execute(query2, u_cl_price=float(cl_price))
-            # conn.execute(query3, u_cl_time=cl_time)
-            # conn.execute(query4, u_stop=float(stop))
-            # conn.execute(query5, u_result=float(result))
-            # conn.execute(query6, u_result_per=float(result_perc))
-            # conn.execute(query7, u_per_no_commis=float(per_no_commis))
-            # conn.execute(query8, u_commis=float(commis))
-
         else:
             # q_value = q_value.replace(',', '.')
             conn.execute(query, u_name=float(q_value))
-        # print('изменения внесены')
+            pass
 
 
 def delete_row_from_sql(connection, table, q_value):
@@ -355,7 +340,6 @@ def sql_table_to_csv(table_name):
         sql_df.to_csv(filepath_close, index=False, sep="\t")
         print('Файл таблицы SQL сохранен!')
 
-
 # #################################################################
 
 
@@ -364,6 +348,7 @@ def sql_table_to_csv(table_name):
 #
 # ######################################################################
 def zscore_calculating(df, lookback):
+
     if lookback > len(df):
         lookback = len(df)
 
@@ -374,7 +359,7 @@ def zscore_calculating(df, lookback):
     # добавляем колонку с разницей sma-цена (A-close)=C
     df['z_diff'] = df['close'] - df['z_sma']
     # рассчитываем zscore как C/B
-    df['zscore'] = df['z_diff'] / df['z_std']
+    df['zscore'] = df['z_diff']/df['z_std']
     df.drop(labels=['z_sma', 'z_std'], axis=1, inplace=True)
     return df
 
@@ -488,6 +473,7 @@ def eg_method(x, y, show_summary=False):
 
 
 def get_statistics(coin1, coin2, coin1_hist, coin2_hist, use_filter=True):
+
     # Разобраться - почему таблицы разной длинны. Должны быть одинаковой на этапе получения истории
     len1 = len(coin1_hist)
     len2 = len(coin2_hist)
@@ -609,10 +595,10 @@ def get_diff_pair(df):
     if check_value < 10:
         multiplier = get_multiplier(check_value, 1)
     # Compute the first-order difference
-    detrended_df['open'] = detrended_df['open'] * multiplier
-    detrended_df['high'] = detrended_df['high'] * multiplier
-    detrended_df['low'] = detrended_df['low'] * multiplier
-    detrended_df['close'] = detrended_df['close'] * multiplier
+    detrended_df['open'] = detrended_df['open']*multiplier
+    detrended_df['high'] = detrended_df['high']*multiplier
+    detrended_df['low'] = detrended_df['low']*multiplier
+    detrended_df['close'] = detrended_df['close']*multiplier
 
     detrended_df['open'] = detrended_df['open'].diff()
     detrended_df['high'] = detrended_df['high'].diff()
@@ -670,8 +656,8 @@ def rolling_st_dev_channels(df, lookback, num_std_dev):
     regression_line, std_dev = rolling_regression_line(close_price, lookback)
     df['line_center'] = regression_line
     df['std_dev'] = std_dev
-    df['line_up'] = df['line_center'] + df['std_dev'] * num_std_dev
-    df['line_down'] = df['line_center'] - df['std_dev'] * num_std_dev
+    df['line_up'] = df['line_center'] + df['std_dev']*num_std_dev
+    df['line_down'] = df['line_center'] - df['std_dev']*num_std_dev
 
     return df
 
@@ -703,6 +689,7 @@ def williams_fractals(df, n):
 
 
 def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
+
     # Get high and low prices
     high = spread_df['high']
     low = spread_df['low']
@@ -736,10 +723,10 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
 
     spread_df['pivots'] = all_pivots
     spread_df['center'] = np.nan
-    for i in range((pp_prd + 1), len(all_pivots)):
+    for i in range((pp_prd+1), len(all_pivots)):
         pivot_now = all_pivots[i - pp_prd]
         if not pd.isna(pivot_now):
-            if not pd.isna(spread_df.iloc[i - 1]['center']):
+            if not pd.isna(spread_df.iloc[i-1]['center']):
                 spread_df.at[i, 'center'] = (spread_df.iloc[i - 1]['center'] * 2 + pivot_now) / 3
             else:
                 spread_df.at[i, 'center'] = pivot_now
@@ -769,8 +756,8 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
     for i in range(atr_prd, len(spread_df)):
         prev_trend = spread_df.iloc[i - 1]['trend']
         prev_trend_down = spread_df.iloc[i - 1]['trend_down']
-        prev_trend_up = spread_df.iloc[i - 1]['trend_up']
-        prev_close = spread_df.iloc[i - 1]['close']
+        prev_trend_up = spread_df.iloc[i-1]['trend_up']
+        prev_close = spread_df.iloc[i-1]['close']
         close = spread_df.iloc[i]['close']
         if pd.isna(prev_trend):
             if close < up[i]:
@@ -830,7 +817,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                     spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
             else:
                 # значит тренд не изменился, что бы определить направление, смотрим на 2 свечи назад
-                if spread_df.iloc[i - 2]['trend'] < spread_df.iloc[i - 2]['close']:  # был тренд вверх
+                if spread_df.iloc[i - 2]['trend'] < spread_df.iloc[i-2]['close']:  # был тренд вверх
                     if prev_trend <= close:  # пробития тренда не было, значит тренд остается
                         spread_df.at[i, 'trend'] = max(prev_trend, up[i])
                         # ####################
@@ -847,7 +834,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                         # ####################
                         spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
                         spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-                elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i - 2]['close']:  # был тренд вниз
+                elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']: # был тренд вниз
                     if prev_trend >= close:  # пробития тренда не было, значит тренд остается
                         spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
                         # ####################
@@ -871,9 +858,9 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
 
 # #######################################################################
 def get_multiplier(check_value, n):
-    new_value = check_value * 10
+    new_value = check_value*10
     if new_value < 10:
-        n = get_multiplier(new_value, 10 * n)
+        n = get_multiplier(new_value, 10*n)
         return n
     else:
         return n
@@ -884,6 +871,7 @@ def get_multiplier(check_value, n):
 #
 # ######################################################################
 def get_coin_min_size(coin):
+
     min_size = 0.01
     try:
         # get_symbol_info - работает только со спотом. пришлось переписать
@@ -906,6 +894,7 @@ def get_coin_min_size(coin):
 
 
 def get_last_price(coin):
+
     try:
         res = binance.fetch_bids_asks([coin])
         df = pd.DataFrame(res)
@@ -968,6 +957,7 @@ def get_all_spot_df(source):
 
 
 def enough_balance(exchange="Binance"):
+
     try:
         if exchange == "Binance":
             res = binance.fetchBalance()
@@ -992,8 +982,6 @@ def get_position(order_id, asset, exchange="Binance"):
         df = pd.DataFrame()
 
     return df
-
-
 # ====================================================================
 
 
@@ -1029,15 +1017,16 @@ def prepare_dataframe(df: pd.DataFrame, timestamp_field: str, asc: bool) -> pd.D
     """
     df.drop_duplicates(subset=[timestamp_field], keep="last", inplace=True)
     df.sort_values(
-        by=[timestamp_field],
-        ascending=asc,
-        inplace=True,
-        ignore_index=True,
+      by=[timestamp_field],
+      ascending=asc,
+      inplace=True,
+      ignore_index=True,
     )
     return df
 
 
 def convert_to_tf(df, tf):
+
     df['startTime'] = pd.to_datetime(df['startTime'])
     df = df.set_index('startTime')
     ohlc = {
@@ -1068,7 +1057,7 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
     :return: [[i1, i2], [i3,i4] ...]
     """
 
-    df["gap"] = df[date_column_label].sort_values().diff() > timeframe * 1000
+    df["gap"] = df[date_column_label].sort_values().diff() > timeframe*1000
 
     intervals = []
 
@@ -1093,6 +1082,7 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
 
 
 def remove_dublicates(df_for_check, df_source):
+
     if len(df_for_check) > 0:
         values_to_drop = df_source['time'].values
         df_for_check['new'] = ~df_for_check['time'].isin(values_to_drop)
@@ -1100,8 +1090,6 @@ def remove_dublicates(df_for_check, df_source):
         df_for_check.drop(labels=['new'], axis=1, inplace=True)
 
     return df_for_check
-
-
 # ======================================================================
 
 
@@ -1110,6 +1098,7 @@ def remove_dublicates(df_for_check, df_source):
 # построение спреда
 # ######################################################################
 def get_binance_historical_klines(asset, tf_str, s_start, end_time, look):
+
     try:
         res = binance_api.get_historical_klines(
             symbol=asset,
@@ -1141,19 +1130,19 @@ def request_history(asset, tf_str, s_start, lookforward, sql=False, tf=tf_5m):
     df = pd.DataFrame()
     while rest_candels > 0:
         if rest_candels > 1000:
-            end_time = s_start + 1000 * tf
-            s_start = int(s_start * 1000)
-            end_time = int(end_time * 1000)
+            end_time = s_start + 1000*tf
+            s_start = int(s_start*1000)
+            end_time = int(end_time*1000)
             look = 1000
         else:
-            end_time = s_start + rest_candels * tf
-            s_start = int(s_start * 1000)
-            end_time = int(end_time * 1000)
+            end_time = s_start + rest_candels*tf
+            s_start = int(s_start*1000)
+            end_time = int(end_time*1000)
             look = rest_candels
         # TODO - проверить запрос!
         # res = binance_api.futures_historical_klines
         res = get_binance_historical_klines(asset, tf_str, s_start, end_time, look)
-        s_start = end_time / 1000
+        s_start = end_time/1000
         rest_candels = rest_candels - 1000
         part_df = pd.DataFrame(res)
         df = pd.concat([df, part_df], ignore_index=True)
@@ -1197,18 +1186,18 @@ def add_candels_to_database(coin, df, start, lookforward, connection):
                 # print(f'Запись в базу не получилась - {coin}')  #{error}
     else:
         # наиболее вероятно - что нет последних данных
-        last_candle_time = df.tail(1).iloc[0]['time'] / 1000
-        first_candle_time = df.head(1).iloc[0]['time'] / 1000
+        last_candle_time = df.tail(1).iloc[0]['time']/1000
+        first_candle_time = df.head(1).iloc[0]['time']/1000
         end_time = start + (lookforward * tf_5m - tf_5m)
         # end_time_raw = start + (lookforward * tf_5m - tf_5m)
         # end_time_pd = pd.to_datetime(end_time_raw, unit='s').tz_localize('UTC').tz_convert('Europe/Moscow')
         # end_time = pd.to_datetime(end_time_pd).ceil('5T').timestamp()
-        lookforward = int((end_time - last_candle_time) / tf_5m)
+        lookforward = int((end_time - last_candle_time)/tf_5m)
         if lookforward < 0:
             lookforward = 0
         lookbackward = int((first_candle_time - start) / tf_5m)
         if lookforward > 0:
-            t_start = last_candle_time + tf_5m
+            t_start = last_candle_time+tf_5m
             df_temp = request_history(coin, tf_5m_str, t_start, lookforward, sql=True)
             df_temp = remove_dublicates(df_temp, df)
             with connection.connect() as conn:
@@ -1260,7 +1249,7 @@ def make_spread_df(df_coin1, df_coin2, last_to_end=False, tf=tf_5m):
     """
     # теперь сделать итоговую таблицу
     main_df = pd.merge(df_coin1, df_coin2, how='inner', on='startTime')
-    main_df['open'] = main_df['open_x'] / main_df['open_y']
+    main_df['open'] = main_df['open_x']/main_df['open_y']
     # main_df['high'] = main_df['high_x'] / main_df['low_y']
     # main_df['low'] = main_df['low_x'] / main_df['high_y']
     main_df['high'] = main_df['high_x'] / main_df['close_y']
@@ -1320,9 +1309,9 @@ def get_history_price(asset, start, end, tf=tf_5m):
                 history_df = prepare_dataframe(df=history_df, timestamp_field="startTime", asc=False)
 
                 # the oldest event
-                history_start = history_df["time"].values[-1] / 1000
+                history_start = history_df["time"].values[-1]/1000
                 # the newest event
-                history_end = history_df["time"].values[0] / 1000
+                history_end = history_df["time"].values[0]/1000
                 # ситуация, когда start внутри диапазона из файла
                 if history_end > start > history_start:
                     if history_end > end:
@@ -1419,6 +1408,7 @@ def get_index_history(indx_name, connection, start, end):
 
 
 def add_indx_klines_to_database(indx_name, history_df, start, end, conn):
+
     # 1. сначала получим спецификацию индекса
     filename = f"{indx_name}.csv"
     filepath = Path("reports", filename)
@@ -1431,10 +1421,10 @@ def add_indx_klines_to_database(indx_name, history_df, start, end, conn):
             weight = index_specs.iloc[row]['weight']
             multipl = index_specs.iloc[row]['multipl']
             coin_df = get_sql_history_price(coin, conn, start, end)
-            coin_df['close'] = coin_df['close'] * multipl * weight
-            coin_df['open'] = coin_df['open'] * multipl * weight
-            coin_df['high'] = coin_df['high'] * multipl * weight
-            coin_df['low'] = coin_df['low'] * multipl * weight
+            coin_df['close'] = coin_df['close']*multipl*weight
+            coin_df['open'] = coin_df['open']*multipl*weight
+            coin_df['high'] = coin_df['high']*multipl*weight
+            coin_df['low'] = coin_df['low']*multipl*weight
 
             # 3. рассчитаем индекс
             if len(final_df) > 0:
@@ -1458,8 +1448,9 @@ def add_indx_klines_to_database(indx_name, history_df, start, end, conn):
 
 
 def calc_last_data(connection, coin1, coin2, lookback, tf, sigma=3):
+
     end_time = datetime.datetime.now().timestamp()
-    start_time = datetime.datetime.now().timestamp() - lookback * tf * 2
+    start_time = datetime.datetime.now().timestamp() - lookback*tf*2
     # df_coin1 = modul.get_history_price(coin1, start_time, end_time, tf)
     # df_coin2 = modul.get_history_price(coin2, start_time, end_time, tf)
     df_coin1 = get_sql_history_price(coin1, connection, start_time, end_time)
@@ -1474,8 +1465,6 @@ def calc_last_data(connection, coin1, coin2, lookback, tf, sigma=3):
     df['bb_up'], df['sma'], df['bb_down'] = talib.BBANDS(df.close, lookback, sigma, sigma, 0)
 
     return df
-
-
 # ===================================================================
 
 
@@ -1489,7 +1478,7 @@ def find_lost_trades(connection, use_sql=True, exchange="Binance"):
     try:
         open_orders = exch_api.fetch_positions()
     except:
-        open_orders = [{'symbol': '', 'contracts': 0.0, }]
+        open_orders = [{'symbol': '', 'contracts': 0.0,}]
     pos_df = pd.DataFrame(open_orders)
     pos_df = pos_df[pos_df.contracts != 0.0]
     if len(pos_df) > 0:
@@ -1509,11 +1498,16 @@ def find_lost_trades(connection, use_sql=True, exchange="Binance"):
             else:
                 print("не найден файл для закрытия позиций")
                 return pd.DataFrame()
-        if len(close_df) > 0:
-            close_df['new1'] = np.where(close_df.going_to == 'DOWN', -close_df['size1'], close_df['size1'])
-            close_df['new2'] = np.where(close_df.going_to == 'UP', -close_df['size2'], close_df['size2'])
-            df1 = close_df[['coin1', 'new1']]
-            df2 = close_df[['coin2', 'new2']]
+
+        pair_df = close_df[close_df['size2'].isna() == False]
+        single_df = close_df[close_df['size2'].isna()]
+        new_pair = pd.DataFrame()
+        new_single = pd.DataFrame()
+        if len(pair_df) > 0:
+            pair_df['new1'] = np.where(pair_df.going_to == 'DOWN', -pair_df['size1'], pair_df['size1'])
+            pair_df['new2'] = np.where(pair_df.going_to == 'UP', -pair_df['size2'], pair_df['size2'])
+            df1 = pair_df[['coin1', 'new1']]
+            df2 = pair_df[['coin2', 'new2']]
             pos_df['real_size'] = np.where(pos_df.side == 'short',
                                            -pos_df['contracts'],
                                            pos_df['contracts'])
@@ -1525,17 +1519,40 @@ def find_lost_trades(connection, use_sql=True, exchange="Binance"):
             new_df = pd.concat([df1, df2], ignore_index=True)
             new_df = new_df.groupby(by=['coin'], as_index=False).sum()
             # new_df = pd.merge(new_df, df2, how='outer', on='coin', left_index=False, right_index=False)
-            new_df2 = pd.concat([new_df, df3], ignore_index=True)
-            new_df2 = new_df2.groupby(by=['coin'], as_index=False).sum()
-            new_df2['diff'] = new_df2['real_size'] - new_df2['size']
-            new_df2 = new_df2[new_df2['diff'] != 0.0]
-            # print(new_df2)
-            return new_df2
-        else:
+            new_pair = pd.concat([new_df, df3], ignore_index=True)
+            new_pair = new_pair.groupby(by=['coin'], as_index=False).sum()
+            new_pair['diff'] = new_pair['real_size']-new_pair['size']
+            new_pair = new_pair[new_pair['diff'] != 0.0]
+
+        if len(single_df) > 0:
+            single_df['new1'] = np.where(single_df.going_to == 'DOWN', -single_df['size1'], single_df['size1'])
+            # pair_df['new2'] = np.where(pair_df.going_to == 'UP', -pair_df['size2'], pair_df['size2'])
+            df1 = single_df[['coin1', 'new1']]
+            # df2 = pair_df[['coin2', 'new2']]
+            pos_df['real_size'] = np.where(pos_df.side == 'short',
+                                           -pos_df['contracts'],
+                                           pos_df['contracts'])
+            df3 = pos_df[['coin', 'real_size']]
+
+            df1.rename(columns={'coin1': 'coin', 'new1': 'size'}, inplace=True)
+            # df2.rename(columns={'coin2': 'coin', 'new2': 'size'}, inplace=True)
+
+            # new_df = pd.concat([df1, df2], ignore_index=True)
+            df1 = df1.groupby(by=['coin'], as_index=False).sum()
+            # new_df = pd.merge(new_df, df2, how='outer', on='coin', left_index=False, right_index=False)
+            new_single = pd.concat([df1, df3], ignore_index=True)
+            new_single = new_single.groupby(by=['coin'], as_index=False).sum()
+            new_single['diff'] = new_single['real_size']-new_single['size']
+            new_single = new_single[new_single['diff'] != 0.0]
+
+        if len(pair_df) == 0 and len(single_df) == 0:
             new_df2 = pd.DataFrame()
             new_df2['coin'] = pos_df['coin']
             new_df2['size'] = pos_df['contracts']
             new_df2['diff'] = pos_df['contracts']
+            return new_df2
+        else:
+            new_df2 = pd.concat([new_pair, new_single], ignore_index=True)
             return new_df2
     else:
         return pd.DataFrame(columns=["coin", "size", "diff"])
@@ -1622,6 +1639,7 @@ def get_open_positions(connection, use_sql=True):
 
 
 def get_selected_pairs(connection):
+
     check_table = create_check_table(connection)
     query = check_table.select()
     with connection.connect() as conn:
@@ -1672,7 +1690,7 @@ def get_max_deviation_from_sma(df, lookback):
     # abnormal_count = 0
     # low_count = 0
     # hl_count = 0
-    halflive = lookback / 3 * 2
+    halflive = lookback/3*2
     for _, row in concated_from_to_time.iterrows():
         # df_slice = df.loc[row["FromTimestm"]:row["ToTimestm"]]
         df_slice = df[(df.time >= row['FromTimestm']) & (df.time <= row['ToTimestm'])]
@@ -1703,9 +1721,9 @@ def get_max_deviation_from_sma(df, lookback):
             max_dev["hl_count"] = 0
         else:
             # рассчитаем изменение дна треугольника
-            last_cross = df_slice.iloc[len(df_slice) - 1]['sma']
+            last_cross = df_slice.iloc[len(df_slice)-1]['sma']
             base_div = abs((last_cross - first_cross) / first_cross * 100)
-            if base_div <= max_deviation / 3:
+            if base_div <= max_deviation/3:
                 max_dev["low_count"] = 0
                 max_dev["norm_count"] = 1
                 max_dev["abnormal_count"] = 0
@@ -1750,13 +1768,13 @@ def check_for_touch_bb(df, lookback, sigma):
         # last_up = last_up.reset_index()
         last_time_up = last_up.iloc[0]['time']
     else:
-        last_time_up = last_time - lookback * tf_5m * 2
+        last_time_up = last_time - lookback*tf_5m*2
     if len(df_down) > 0:
         last_down = df_down.tail(1)
         # last_down = last_down.reset_index()
         last_time_down = last_down.iloc[0]['time']
     else:
-        last_time_down = last_time - lookback * tf_5m * 2
+        last_time_down = last_time - lookback*tf_5m*2
 
     if last_time_up > last_time_down:
         time_round = (last_time_up - last_time_down) / 1000 / tf_5m
@@ -1767,9 +1785,9 @@ def check_for_touch_bb(df, lookback, sigma):
         time_to_end = (last_time - last_time_down) / 1000 / tf_5m
         time_to_opposite = (last_time - last_time_up) / 1000 / tf_5m
     else:
-        time_round = lookback * 2
-        time_to_end = lookback * 2
-        time_to_opposite = lookback * 2
+        time_round = lookback*2
+        time_to_end = lookback*2
+        time_to_opposite = lookback*2
 
     return time_round, time_to_end, time_to_opposite
 
@@ -1781,6 +1799,7 @@ def check_for_touch_bb(df, lookback, sigma):
 def open_pair_position(connection, coin1, coin2, going_to, amount, lookback, stop=0.0,
                        limit=True, strategy='zscore', up_from=0.0, down_to=0.0,
                        use_sql_for_report=True, exchange='Binance'):
+
     if going_to == 'UP':
         pos_side1 = 'buy'
         pos_side2 = 'sell'
@@ -1796,7 +1815,7 @@ def open_pair_position(connection, coin1, coin2, going_to, amount, lookback, sto
             coin2_id = order_data2.iloc[0]['id']
             c1_price = order_data1.iloc[0]['price']
             c2_price = order_data2.iloc[0]['price']
-            price = c1_price / c2_price
+            price = c1_price/c2_price
             pos_size1 = order_data1.iloc[0]['p_size']
             pos_size2 = order_data2.iloc[0]['p_size']
 
@@ -1829,18 +1848,18 @@ def open_pair_position(connection, coin1, coin2, going_to, amount, lookback, sto
         try:
             c1_price = order_data1['price']
             c2_price = order_data2['price']
-            price = c1_price / c2_price
+            price = c1_price/c2_price
         except Exception as error:
             c1_price = last_price1
             c2_price = last_price2
-            price = last_price1 / last_price2
+            price = last_price1/last_price2
             print(f'ошибка расчета цены сделки - {error}')
 
     # добавляем пару к отслеживанию
     new_row = pd.DataFrame({
         'coin1_id': [coin1_id],
         'coin2_id': [coin2_id],
-        'pair': [coin1 + "-" + coin2],
+        'pair': [coin1+"-"+coin2],
         'coin1': [coin1],
         'coin2': [coin2],
         'going_to': [going_to],
@@ -1873,7 +1892,8 @@ def open_pair_position(connection, coin1, coin2, going_to, amount, lookback, sto
 
 
 def open_single_position(connection, coin1, going_to, amount, lookback, stop=0.0,
-                         limit=True, strategy='pp_supertrend', use_sql_for_report=True, exchange='Binance'):
+                       limit=True, strategy='pp_supertrend', use_sql_for_report=True, exchange='Binance'):
+
     if going_to == 'UP':
         pos_side1 = 'buy'
     else:
@@ -1912,22 +1932,16 @@ def open_single_position(connection, coin1, going_to, amount, lookback, stop=0.0
     # добавляем пару к отслеживанию
     new_row = pd.DataFrame({
         'coin1_id': [coin1_id],
-        'coin2_id': [""],
-        'pair': [coin1 + "-" + coin1],
+        'pair': [coin1],
         'coin1': [coin1],
-        'coin2': [""],
         'going_to': [going_to],
         'price': [round(c1_price, 6)],
         'stop': [stop],
         'size1': [pos_size1],
-        'size2': [""],
         'strategy': [strategy],
         'lookback': [lookback],
-        'up': [""],
-        'down': [""],
         'exchange': [exchange],
-        'c1_op_price': [round(c1_price, 6)],
-        'c2_op_price': [""]
+        'c1_op_price': [round(c1_price, 6)]
     },
         index=None)
 
@@ -1972,8 +1986,8 @@ def close_position(order_id, coin, size=0.0, limit=False, exchange="Binance"):
 def close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price, new_row,
                         limit=True, exchange="Binance"):
     # Close positions
-    close_position(coin1_id, coin1, size1, limit, exchange)
-    close_position(coin2_id, coin2, size2, limit, exchange)
+    close_position(int(coin1_id), coin1, size1, limit, exchange)
+    close_position(int(coin2_id), coin2, size2, limit, exchange)
     save_close_changes(connection, coin1_id)
     print(f'закрыли позицию по {coin1}/{coin2}, цена={l_price}, в {datetime.datetime.now()}')
     save_to_log(coin1_id, new_row, False, connection, sql=True, exchange=exchange)
@@ -1981,7 +1995,7 @@ def close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, siz
 
 def close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, limit=True, exchange="Binance"):
     # Close positions
-    close_position(coin1_id, coin1, size1, limit, exchange)
+    close_position(int(coin1_id), coin1, size1, limit, exchange)
     save_close_changes(connection, coin1_id)
     print(f'закрыли позицию по {coin1}, цена={l_price}, в {datetime.datetime.now()}')
     save_to_log(coin1_id, new_row, False, connection, sql=True, exchange=exchange)
@@ -2025,6 +2039,7 @@ def place_market_order(coin, p_size, p_side="buy", exchange="Binance"):
 
 
 def save_to_log(idd, row, new, connection, sql=True, exchange="Binance"):
+
     if sql:
         table_sql = create_orders_table(connection)
         query = table_sql.select()
@@ -2058,7 +2073,7 @@ def save_to_log(idd, row, new, connection, sql=True, exchange="Binance"):
             going_to = log_df.iloc[ind_row]['going_to']
             stop = row.iloc[0]['stop']
 
-            if coin2 == "":  # this is single position
+            if pd.isna(coin2):  # this is single position
                 res_1 = fetch_closed_order(idd, coin1, exchange)
                 c1_cl_price = res_1['cl_price']
                 if c1_cl_price != 0.0:
@@ -2090,11 +2105,11 @@ def save_to_log(idd, row, new, connection, sql=True, exchange="Binance"):
                 c1_cl_price = res_1['cl_price']
                 c2_cl_price = res_2['cl_price']
                 if c1_cl_price != 0.0 and c2_cl_price != 0.0:
-                    cl_price = round(c1_cl_price / c2_cl_price, 6)
+                    cl_price = round(c1_cl_price/c2_cl_price, 6)
                     cl_time = res_2['cl_time']
                     c1_op_price = res_1['op_price']
                     c2_op_price = res_2['op_price']
-                    op_price = round(c1_op_price / c2_op_price, 6)
+                    op_price = round(c1_op_price/c2_op_price, 6)
                     com_per = res_1['com_per'] + res_2['com_per']
                     profit = res_1['profit'] + res_2['profit']
                     if going_to == 'UP':
@@ -2150,6 +2165,7 @@ def save_to_log(idd, row, new, connection, sql=True, exchange="Binance"):
 
 
 def save_close_changes(connection, coin1_id, use_sql_for_report=True):
+
     if use_sql_for_report:
         close_table = create_close_table(connection)
         query = close_table.delete().where(close_table.columns.coin1_id == int(coin1_id))
@@ -2214,6 +2230,7 @@ def make_limit_order(coin, amount, p_side, size=0.0, exchange="Binance"):
 
 # открытие нового лимитного ордера
 def place_limit_order(coin, p_price, p_size, p_side="buy", exchange="Binance"):
+
     if exchange == "Binance":
         try:
             o_result = binance.create_limit_order(
@@ -2284,9 +2301,9 @@ def edit_limit_order(order_id, coin, p_side, new_size, l_price, exchange="Binanc
         res_modify = place_limit_order(coin, l_price, new_size, p_side, exchange)
         return True, res_modify
 
-
 # отмена открытого ордера
 def cancel_limit_order(order_id, coin, exchange="Binance"):
+
     if exchange == "Binance":
         try:
             o_result = binance.cancel_order(id=order_id, symbol=coin)
@@ -2317,6 +2334,7 @@ def fetch_opened_order(order_id, coin, exchange="Binance"):
 
 
 def fetch_closed_order(order_id, coin, exchange="Binance"):
+
     # time_since = datetime.datetime.strptime(op_time, '%Y-%m-%d %H:%M:%S.%f').timestamp()*1000-30000
     try:
         request = {'orderId': order_id, }
@@ -2344,7 +2362,7 @@ def fetch_closed_order(order_id, coin, exchange="Binance"):
         close_row = close_df.iloc[0][0]
         op_price = float(open_row['price'])
         cl_price = float(close_row['price'])
-        cl_time = datetime.datetime.fromtimestamp(close_row['timestamp'] / 1000)
+        cl_time = datetime.datetime.fromtimestamp(close_row['timestamp']/1000)
         if len(open_df) > 1:
             op_comis = 0.0
             op_size = 0.0
@@ -2402,6 +2420,7 @@ def fetch_closed_order(order_id, coin, exchange="Binance"):
 
 # управление ордером до момента полного открытия позиции
 def manage_limit_order(order_id, coin, p_size, p_side, count=1, exchange="Binance"):
+
     # time.sleep(1)
     # проверим, исполнен ли ордер
     res = fetch_opened_order(order_id, coin, exchange)
@@ -2450,13 +2469,10 @@ def manage_limit_order(order_id, coin, p_size, p_side, count=1, exchange="Binanc
         return res_df
     else:
         return result_df
-
-
 # =========================================================================
 
 
 if __name__ == '__main__':
-    pass
-    # sql_table_to_csv('bin_to_close')
-    # sql_table_to_csv('bin_to_check')
-    # sql_table_to_csv('orders_log')
+    sql_table_to_csv('bin_to_close')
+    sql_table_to_csv('bin_to_check')
+    sql_table_to_csv('orders_log')

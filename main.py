@@ -457,12 +457,18 @@ class App(QWidget):
             strategy = self.ui.tradingOpenPos.item(new_row, 7).text()
             exchange = self.ui.tradingOpenPos.item(new_row, 13).text()
             strat_lkbk = int(self.ui.tradingOpenPos.item(new_row, 8).text())
+            coin2_id = self.ui.tradingOpenPos.item(new_row, 10).text()
             lookback = 2000
 
             self.ui.textGraphPair_2.setText(cell_value)
             self.ui.textPairTrade.setText(cell_value)
-
-            df = get_pair_marketdata(cell_value, lookback, exchange)
+            if coin2_id == 'nan':
+                end_time = datetime.datetime.now().timestamp()
+                start_time = end_time - lookback * tf_5m - tf_5m * 50
+                df = modul.get_sql_history_price(cell_value, connection, start_time, end_time)
+                df.sort_values(by='startTime', ascending=True, inplace=True, ignore_index=True)
+            else:
+                df = get_pair_marketdata(cell_value, lookback, exchange)
             max_df = df['high'].max()
             min_df = df['low'].min()
             plot_item = CandlestickItem(df)
@@ -493,7 +499,9 @@ class App(QWidget):
                 self.ui.plotWidget.plot(df['line_center'], pen='r')
                 self.ui.plotWidget.plot(df['line_up'], pen='b')
                 self.ui.plotWidget.plot(df['line_down'], pen='b')
-
+            elif strategy == 'pp_supertrend':
+                df = modul.pivot_point_supertrend(df, 2, 3, 10)
+                self.ui.plotWidget.plot(df['trend'], pen='r')
             else:
                 df['bb_up'], df['sma'], df['bb_down'] = talib.BBANDS(df.close, strat_lkbk, bb_sigma, bb_sigma, 0)
                 df['sma'] = df["close"].rolling(window=strat_lkbk, min_periods=1).mean()
@@ -561,9 +569,17 @@ class App(QWidget):
         start_time = op_time - 1500*tf_5m
         end_time = cl_time + 600*tf_5m
         window_graph = (end_time - start_time) / tf_5m
-        df = get_pair_marketdata(cell_value, window_graph, 'Binance', end_time)
+
+        if "-" in cell_value:  # this is a pair
+            df = get_pair_marketdata(cell_value, window_graph, 'Binance', end_time)
+        else:  # this is a single
+            df = modul.get_sql_history_price(cell_value, connection, start_time, end_time)
+            df.sort_values(by='startTime', ascending=True, inplace=True, ignore_index=True)
+
         if strategy == 'st_dev':
             df = modul.rolling_st_dev_channels(df, lookb_k, 1.5)
+        elif strategy == 'pp_supertrend':
+            df = modul.pivot_point_supertrend(df, 2, 3, 10)
         else:
             df['bb_up'],_, df['bb_down'] = talib.BBANDS(df.close, lookb_k, 1, 1, 0)
             df['sma'] = df["close"].rolling(window=lookb_k, min_periods=1).mean()
@@ -585,6 +601,8 @@ class App(QWidget):
             self.ui.resPlotPair.plot(df['line_center'], pen='r')
             self.ui.resPlotPair.plot(df['line_up'], pen='b')
             self.ui.resPlotPair.plot(df['line_down'], pen='b')
+        elif strategy == 'pp_supertrend':
+            self.ui.resPlotPair.plot(df['trend'], pen='r')
         else:
             self.ui.resPlotPair.plot(df['sma'], pen='r')
             self.ui.resPlotPair.plot(df['bb_up'], pen='b')
@@ -597,23 +615,25 @@ class App(QWidget):
         line_pen = pg.mkPen(color='b', width=2, style=QtCore.Qt.DashLine)
         line = pg.PlotCurveItem([op_time_pos, cl_time_pos], [op_price, cl_price], pen=line_pen)
         self.ui.resPlotPair.addItem(line)
-        # Выведем отдельные графики выбранных монет
-        df_coin1 = get_coin_marketdata(coin1, window_graph, 'Binance', True, end_time)
-        df_coin2 = get_coin_marketdata(coin2, window_graph, 'Binance', True, end_time)
-        df_coin1 = df_coin1[lookb_k:]
-        df_coin2 = df_coin2[lookb_k:]
-        # create the y-axis values for each dataframe
-        y1 = df_coin1['close'].values
-        y2 = df_coin2['close'].values
 
-        min_value = min(y1.min(), y2.min())
-        max_value = max(y1.max(), y2.max())
+        if "-" in cell_value:
+            # Выведем отдельные графики выбранных монет
+            df_coin1 = get_coin_marketdata(coin1, window_graph, 'Binance', True, end_time)
+            df_coin2 = get_coin_marketdata(coin2, window_graph, 'Binance', True, end_time)
+            df_coin1 = df_coin1[lookb_k:]
+            df_coin2 = df_coin2[lookb_k:]
+            # create the y-axis values for each dataframe
+            y1 = df_coin1['close'].values
+            y2 = df_coin2['close'].values
 
-        self.ui.resPlotSingle.clear()
-        self.ui.resPlotSingle.plot(y1, pen='r')
-        self.ui.resPlotSingle.plot(y2, pen='b')
+            min_value = min(y1.min(), y2.min())
+            max_value = max(y1.max(), y2.max())
 
-        self.ui.resPlotSingle.setYRange(min_value, max_value)
+            self.ui.resPlotSingle.clear()
+            self.ui.resPlotSingle.plot(y1, pen='r')
+            self.ui.resPlotSingle.plot(y2, pen='b')
+
+            self.ui.resPlotSingle.setYRange(min_value, max_value)
 
     def set_analyse_dates(self):
         year = datetime.datetime.now().year
