@@ -6,7 +6,7 @@ from os import path
 from pathlib import Path
 import numpy as np
 import BinScreener as scrn
-import pandas_ta as ta
+# import pandas_ta as ta
 
 tf_5m = 5 * 60
 connection = modul.connect_to_sqlalchemy_binance()

@@ -60,6 +60,35 @@ def fill_deep_history_from(start_time):
                     time.sleep(1)
 
 
+def fill_deep_sql_history_from(start_time):
+    all_coins = modul.get_all_futures()
+    all_futures = all_coins.id.tolist()
+    # all_futures = ['DUSKUSDT', 'LINAUSDT']
+    max_time = 1000*tf_5m
+
+    for future in all_futures:
+        s_time = start_time
+        print(f'Заполняем данные по {future}')
+        coin_table = modul.create_olhc_table(future, connection)
+        query = coin_table.select()
+        with connection.connect() as conn:
+            coin_df = pd.read_sql(sql=query, con=conn)
+
+        # coin_df = pd.DataFrame()
+        if len(coin_df) > 0:
+            coin_df = modul.prepare_dataframe(df=coin_df, timestamp_field="startTime", asc=False)
+            # the oldest event
+            base_start = coin_df["time"].values[-1] / 1000
+            while base_start > s_time:
+                time_gap = base_start - s_time
+                if time_gap > max_time:
+                    time_gap = max_time
+                end_time = s_time + time_gap
+                modul.get_sql_history_price(future, connection, s_time, end_time)
+                s_time = s_time + time_gap
+                time.sleep(1)
+
+
 def fill_history_gaps(coin, tf):
     filename = f"{coin}.csv"
     filepath = Path("files", filename)
@@ -860,7 +889,7 @@ if __name__ == '__main__':
     # find_new_pairs_for_bb3_art()
 
     # параметры для сеточных стратегий
-    # find_new_pairs_for_grid1()
+    find_new_pairs_for_grid1()
     # check_for_touch_bb(1000, 1, 2)
     # get_screening_to_index(2000)
 
@@ -869,7 +898,7 @@ if __name__ == '__main__':
     # get_triangle_selected_list(3000)
     # get_bb_touch_list(1000)
     # check_for_touch_bb(1000, 1, 1)
-    fill_all_gaps(None, n=5)
+    # fill_all_gaps(None, n=5)
 
     # #############################################################
     # Процедура поиска резких всплесков цены
@@ -880,8 +909,9 @@ if __name__ == '__main__':
     #     time.sleep(180)
 
     # блок первичного заполнения исторических данных
-    # start_t = datetime.datetime(2022, 10, 20, 0, 0).timestamp()
+    # start_t = datetime.datetime(2023, 2, 1, 0, 0).timestamp()
     # fill_deep_history_from(start_t)
+    # fill_deep_sql_history_from(start_t)
     # check_parameters_stability(window=3000, steps=1, shift=300, file=3, go_next=False)
     # summarize_history_check()
     # cProfile.run("get_screening_result(False, 9000)")
