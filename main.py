@@ -723,6 +723,11 @@ class App(QWidget):
         # close_byb['exchange'] = 'Bybit'
         row = 0
         close_df = pd.concat([close_bin, close_byb], ignore_index=True)
+
+        strategy_filter = self.ui.strategyList_4open.currentText()
+        if strategy_filter != '---':
+            close_df = close_df[close_df['strategy'] == strategy_filter]
+
         if sort == 'name':
             close_df.sort_values(by='pair', ascending=True, inplace=True, ignore_index=True)
         self.ui.tradingOpenPos.setRowCount(len(close_df))
