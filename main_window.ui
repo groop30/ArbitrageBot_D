@@ -37,7 +37,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <property name="elideMode">
      <enum>Qt::ElideNone</enum>
@@ -1410,6 +1410,61 @@
        <string>Normalize pair</string>
       </property>
      </widget>
+     <widget class="QComboBox" name="strategyList_4open">
+      <property name="geometry">
+       <rect>
+        <x>1150</x>
+        <y>320</y>
+        <width>141</width>
+        <height>21</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>10</pointsize>
+       </font>
+      </property>
+      <item>
+       <property name="text">
+        <string>---</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>grid_1</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>pp_supertrend</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>bb3_atr</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>st_dev</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>bb2</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>manual</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>zscore</string>
+       </property>
+      </item>
+     </widget>
      <zorder>groupBox</zorder>
      <zorder>label_3</zorder>
      <zorder>label_4</zorder>
@@ -1424,6 +1479,7 @@
      <zorder>newStatsButton</zorder>
      <zorder>sortName</zorder>
      <zorder>tradeNormalize</zorder>
+     <zorder>strategyList_4open</zorder>
     </widget>
     <widget class="QWidget" name="analyze">
      <attribute name="title">

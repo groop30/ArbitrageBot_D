@@ -857,10 +857,10 @@ if __name__ == '__main__':
     # check_parameters_stability(window=1000, steps=4, shift=152, file=3, go_next=False)
     # summarize_history_check()
 
-    find_new_pairs_for_bb3_art()
+    # find_new_pairs_for_bb3_art()
 
     # параметры для сеточных стратегий
-    find_new_pairs_for_grid1()
+    # find_new_pairs_for_grid1()
     # check_for_touch_bb(1000, 1, 2)
     # get_screening_to_index(2000)
 
@@ -869,7 +869,7 @@ if __name__ == '__main__':
     # get_triangle_selected_list(3000)
     # get_bb_touch_list(1000)
     # check_for_touch_bb(1000, 1, 1)
-    # fill_all_gaps(None, n=5)
+    fill_all_gaps(None, n=5)
 
     # #############################################################
     # Процедура поиска резких всплесков цены

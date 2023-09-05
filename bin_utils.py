@@ -1059,25 +1059,30 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
 
     df["gap"] = df[date_column_label].sort_values().diff() > timeframe*1000
 
+    df['time_from'] = df[date_column_label].shift(1)
     intervals = []
 
     previous_timestamp: Optional[int] = None
     gap_finded = False
-    for d in df.to_dict(orient="records"):
-        if previous_timestamp:
-            if gap_finded:
-                intervals.append([previous_timestamp, d[date_column_label]])
-                gap_finded = False
-            if d["gap"]:
-                gap_finded = True
-                previous_timestamp = d[date_column_label]
-                continue
+    # for d in df.to_dict(orient="records"):
+    #     if previous_timestamp:
+    #         if gap_finded:
+    #             intervals.append([previous_timestamp, d[date_column_label]])
+    #             gap_finded = False
+    #         if d["gap"]:
+    #             gap_finded = True
+    #             previous_timestamp = d[date_column_label]
+    #             continue
 
-        previous_timestamp = d[date_column_label]
+        # previous_timestamp = d[date_column_label]
         # if not d["gap"]:
         #    continue
+    df_gaps = df[df['gap']==True]
 
-    df.drop(labels=["gap"], axis=1, inplace=True)
+    for  d in df_gaps.to_dict(orient="records"):
+        intervals.append([d['time_from'], d[date_column_label]])
+
+    df.drop(labels=["gap", "time_from"], axis=1, inplace=True)
     return intervals
 
 
@@ -1223,19 +1228,21 @@ def add_candels_to_database(coin, df, start, lookforward, connection):
         intervals = get_fetch_intervals(df=df, date_column_label="time", timeframe=tf_5m)
         # Заполняем пропуски
         if lookforward == 0:
-            lookforward = 100
+            lookforward = 1000
         for period in intervals:
-            s_start = period[1] / 1000
-            df_temp = request_history(coin, tf_5m_str, s_start, lookforward, sql=True)
-            df_temp = remove_dublicates(df_temp, df)
-            with connection.connect() as conn:
-                try:
-                    df_temp.to_sql(name=coin.lower(), con=conn, if_exists='append', index=False)
-                except ValueError:
-                    pass
-                    # print(f'Запись в базу не получилась - {coin}')  #{error}
-            df = pd.concat([df, df_temp], ignore_index=True)
-            df = prepare_dataframe(df=df, timestamp_field="startTime", asc=False)
+            s_start = period[0] / 1000
+            while s_start <= (period[1] / 1000):
+                df_temp = request_history(coin, tf_5m_str, s_start, lookforward, sql=True)
+                df_temp = remove_dublicates(df_temp, df)
+                with connection.connect() as conn:
+                    try:
+                        df_temp.to_sql(name=coin.lower(), con=conn, if_exists='append', index=False)
+                    except ValueError:
+                        pass
+                        # print(f'Запись в базу не получилась - {coin}')  #{error}
+                df = pd.concat([df, df_temp], ignore_index=True)
+                df = prepare_dataframe(df=df, timestamp_field="startTime", asc=False)
+                s_start = s_start + 1000*tf_5m
     return df
 
 
