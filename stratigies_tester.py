@@ -629,22 +629,22 @@ def single_strategy_testing(start_time, end_time):
 
 def single_strategy_testing_moex(start_time, end_time):
     headers = alor_modul.autorization()
-    list_of_sectors = ['FORTS', 'FOND', 'CURR']
+    # list_of_sectors = ['FORTS', 'FOND', 'CURR']
     alor_connection = alor_modul.connect_to_sqlalchemy_moex()
 
-    for sector in list_of_sectors:
-        list = alor_modul.fetch_securities_list(headers, sector)  # FORTS, FOND, CURR
-        all_securites= list['symbol']
-
-        trades_df = pd.DataFrame()
-        for asset in all_securites:
-            print(f'Тестируем инструмент {asset}')
-            df = test_strategy_moex_pp_supertrend(asset, start_time, end_time, alor_connection, headers, 2, 3, 10)
-            # df = strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
-            if len(df) > 0:
-                df['coin'] = asset
-                # df['link'] = f'BINANCE:{future}.P'
-                trades_df = pd.concat([trades_df, df], ignore_index=True)
+    # for sector in list_of_sectors:
+    #     list = alor_modul.fetch_securities_list(headers, sector)  # FORTS, FOND, CURR
+    #     all_securites= list['symbol']
+    futures = ['CRU3', 'SIU3', 'EuU3', 'NGU3', 'BRU3', 'EDU3', 'GDU3', 'RIU3', 'MMU3', 'SVU3', 'GAZP', 'SBER', 'LKOH']
+    # shares = []
+    trades_df = pd.DataFrame()
+    for asset in futures:
+        print(f'Тестируем инструмент {asset}')
+        df = test_strategy_moex_pp_supertrend(asset, start_time, end_time, alor_connection, headers, 2, 3, 10)
+        # df = strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
+        if len(df) > 0:
+            df['coin'] = asset
+            trades_df = pd.concat([trades_df, df], ignore_index=True)
 
     trades_df['cumulat_per'] = round(trades_df['result_per'].cumsum(), 2)
     trades_df['cum_max_per'] = round(trades_df['cumulat_per'].cummax(), 2)
@@ -3004,8 +3004,8 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
     """
     Тестируем стратегию.
     """
-    start_date = start_date - 500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
-    spread_df = alor_modul.get_sql_history_price(coin1, alor_connection, start_date, end_date, headers)
+    temp_start_date = start_date - 1500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
+    spread_df = alor_modul.get_sql_history_price(coin1, alor_connection, temp_start_date, end_date, headers)
     if len(spread_df) == 0:
         return pd.DataFrame()
 
@@ -3018,7 +3018,8 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
     mae = mfe = 0.0
     amount = 250.0
 
-    spread_df = spread_df.iloc[500:]
+    start_index = spread_df.index[spread_df['time'] < int(start_date)].tolist()[-1]
+    spread_df = spread_df.iloc[start_index:]
     spread_df = spread_df.reset_index()
     check_df = spread_df.copy()
     stop = 0.0
@@ -3043,7 +3044,7 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
                     if len(test_df) > 1:
                         if test_df.iloc[-1]['trend'] > test_df.iloc[-2]['trend']:  # v.2
                             difference = (spread_df.iloc[index-1]['trend'] - test_df.iloc[-1]['trend'])/test_df.iloc[-1]['trend']
-                            if difference > 0.005:  # v.1 test
+                            if difference > 0.003:  # v.1 test
                                 #текущий тренд - третий подряд растущий, открываем позицию лонг
                                 in_position = True
                                 df = add_new_position('long', time, close, size)
@@ -3057,7 +3058,7 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
                     if len(test_df) > 1:
                         if test_df.iloc[-1]['trend'] < test_df.iloc[-2]['trend']:  # v.2
                             difference = (test_df.iloc[-1]['trend'] - spread_df.iloc[index-1]['trend']) / spread_df.iloc[index-1]['trend']
-                            if difference > 0.005:  # v.1 test
+                            if difference > 0.003:  # v.1 test
                                 # текущий тренд - третий подряд падающий, открываем позицию шорт
                                 in_position = True
                                 df = add_new_position('short', time, close, size)

@@ -76,7 +76,7 @@ def add_candels_to_database(asset, df, start_date, end_date, connection, headers
                     pass
                     # print(f'Запись в базу не получилась - {coin}')  #{error}
             df = pd.concat([df, df_temp], ignore_index=True)
-            df = modul.prepare_dataframe(df=df, timestamp_field="startTime", asc=False)
+            df = modul.prepare_dataframe(df=df, timestamp_field="startTime", asc=True)
         if lookbackward > 0:
             df_temp = fetch_alor_history_price(headers, asset, start_date, first_candle_time)
             df_temp = modul.remove_dublicates(df_temp, df)
@@ -87,7 +87,7 @@ def add_candels_to_database(asset, df, start_date, end_date, connection, headers
                     pass
                     # print(f'Запись в базу не получилась - {coin}')  #{error}
             df = pd.concat([df, df_temp], ignore_index=True)
-            df = modul.prepare_dataframe(df=df, timestamp_field="startTime", asc=False)
+            df = modul.prepare_dataframe(df=df, timestamp_field="startTime", asc=True)
         # потом проверяем на пропуски
         intervals = modul.get_fetch_intervals(df=df, date_column_label="time", timeframe=tf_5m)
         # Заполняем пропуски
@@ -160,8 +160,17 @@ def autorization():
 def fetch_securities_list(headers, sector):
 
     if sector == 'FORTS':
-        list_one = ['CRU3','SIU3','']
-        api_url = f'https://api.alor.ru/md/v2/Securities?query=CRU3&limit=1000&sector={sector}&exchange=MOEX&format=Simple'
+        list_one = ['CRU3','SIU3','EuU3', 'NGU3', 'BRU3', 'EDU3', 'GDU3', 'RIU3', 'MMU3', 'SVU3']  # временное решение. надо разобраться как отбирать последние контракты
+        full_df = pd.DataFrame()
+        for asset in list_one:
+            api_url = f'https://api.alor.ru/md/v2/Securities?query={asset}&limit=1000&sector={sector}&exchange=MOEX&format=Simple'
+            response = requests.get(api_url, headers=headers)
+            if response.status_code == 200:
+                res = response.json()
+                df = pd.DataFrame(res)
+                full_df = pd.concat([full_df, df.head(1)], ignore_index=True)
+
+        return full_df
     elif sector == 'FOND':
         api_url = f'https://api.alor.ru/md/v2/Securities?limit=1000&sector={sector}&cficode=ESXXXX&exchange=MOEX&format=Simple'
         response = requests.get(api_url, headers=headers)
@@ -179,14 +188,16 @@ def fetch_securities_list(headers, sector):
 
 def fetch_alor_history_price(headers, asset, start_date, end_date):
     # Пример авторизованного GET-запроса
-    api_url = f'https://api.alor.ru/md/v2/history?symbol={asset}&exchange=MOEX&tf={tf_5m}&from={start_date}&to={end_date}&format=Simple'
+    api_url = f'https://api.alor.ru/md/v2/history?symbol={asset}&exchange=MOEX&tf={tf_5m}&from={int(start_date)}' \
+              f'&to={int(end_date)}&format=Simple'
     response = requests.get(api_url, headers=headers)
 
     if response.status_code == 200:
         # Обработайте успешный ответ здесь
         res = response.json()
         df = pd.DataFrame(res['history'])
-        df['startTime'] = df['time'].map(lambda x: datetime.datetime.fromtimestamp(x))
+        if len(df) > 0:
+            df['startTime'] = df['time'].map(lambda x: datetime.datetime.fromtimestamp(x))
         return df
     else:
         print('Ошибка при запросе истории цен:', response.status_code)
