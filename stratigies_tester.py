@@ -7,35 +7,10 @@ from pathlib import Path
 import numpy as np
 import BinScreener as scrn
 import alor as alor_modul
+import indicators as ind
 
 tf_5m = 5 * 60
 connection = modul.connect_to_sqlalchemy_binance()
-
-
-def williams_fractals(df, n):
-    high_prices = df['high']
-    low_prices = df['low']
-
-    ddf_high = pd.DataFrame()
-    ddf_high['high'] = high_prices
-    ddf_high['one_left'] = high_prices.shift(1)
-    ddf_high['two_left'] = high_prices.shift(2)
-    ddf_high['one_right'] = high_prices.shift(-1)
-    ddf_high['two_right'] = high_prices.shift(-2)
-    ddf_high['pivot_high'] = (ddf_high['high'] >= ddf_high['one_left']) & (ddf_high['high'] >= ddf_high['two_left']) \
-                             & (ddf_high['high'] > ddf_high['one_right']) & (ddf_high['high'] > ddf_high['two_right'])
-
-    ddf_low = pd.DataFrame()
-    ddf_low['low'] = low_prices
-    ddf_low['one_left'] = low_prices.shift(1)
-    ddf_low['two_left'] = low_prices.shift(2)
-    ddf_low['one_right'] = low_prices.shift(-1)
-    ddf_low['two_right'] = low_prices.shift(-2)
-    ddf_low['pivot_low'] = (ddf_low['low'] <= ddf_low['one_left']) & (ddf_low['low'] <= ddf_low['two_left']) \
-                             & (ddf_low['low'] < ddf_low['one_right']) & (ddf_low['low'] < ddf_low['two_right'])
-
-    # return up_fractals, down_fractals
-    return ddf_high['pivot_high'], ddf_low['pivot_low']
 
 
 def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
@@ -45,7 +20,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
     low = spread_df['low']
     close = spread_df['close']
     # Calculate pivots
-    pivot_high_series, pivot_low_series = williams_fractals(spread_df, pp_prd)
+    pivot_high_series, pivot_low_series = ind.williams_fractals(spread_df, pp_prd)
 
     pivot_high_values = np.where(pivot_high_series, spread_df['high'], False)
     pivot_low_values = np.where(pivot_low_series, spread_df['low'], False)
@@ -130,7 +105,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                     spread_df.at[i, 'switch'] = True
                     spread_df.at[i, 'switch_to'] = 'up'
                     # ####################
-                    spread_df.at[i, 'trend_down'] = dn[i] # не смысла смотреть min, точно знаем что цена пробила
+                    spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
                     spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
 
             elif prev_trend < prev_close:
@@ -2477,7 +2452,7 @@ def strategy_structurebreak_catcher(coin1, coin2, start_date, end_date, lookback
     #     return result_df
     spread_df = spread_df.iloc[lookback*2:]
     spread_df = spread_df.reset_index()
-    high, low = williams_fractals(spread_df, 5)
+    high, low = ind.williams_fractals(spread_df, 5)
     for index in range(len(spread_df)):
 
         # вынем из дф нужные данные в переменные
@@ -2874,9 +2849,7 @@ def test_strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor,
     result_df = df = pd.DataFrame()
 
     spread_df = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
-    # spread_df['atr6'] = talib.ATR(spread_df['high'], spread_df['low'], spread_df['close'], timeperiod=6)
-    # spread_df['atr12'] = talib.ATR(spread_df['high'], spread_df['low'], spread_df['close'], timeperiod=12)
-    # spread_df['atr48'] = talib.ATR(spread_df['high'], spread_df['low'], spread_df['close'], timeperiod=48)
+    spread_df['bb_up'], _, spread_df['bb_down'] = talib.BBANDS(spread_df.close, 288, 3, 3, 0)
     in_position = False
     last_short = last_long = 0.0
     mae = mfe = 0.0
@@ -2906,51 +2879,42 @@ def test_strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor,
                     test_df = test_df[test_df['switch_to'] == 'up']
 
                     if len(test_df) > 1:
-                        # if trend > test_df.iloc[-1]['trend'] > test_df.iloc[-2]['trend']:
                         if test_df.iloc[-1]['trend'] > test_df.iloc[-2]['trend']:  # v.2
                             difference = (spread_df.iloc[index-1]['trend'] - test_df.iloc[-1]['trend'])/test_df.iloc[-1]['trend']
                             if difference > 0.005:  # v.1 test
                                 #текущий тренд - третий подряд растущий, открываем позицию лонг
                                 in_position = True
                                 df = add_new_position('long', time, close, size)
-                                # stop = trend
                                 stop = test_df.iloc[-1]['trend']  # v.2
-                                # take = close + close*difference
                                 mae = mfe = last_long = close
-                                # df['atr6'] = spread_df.iloc[index]['atr6']
-                                # df['atr12'] = spread_df.iloc[index]['atr12']
-                                # df['atr48'] = spread_df.iloc[index]['atr48']
                 else:
                     # переключились на падающий тренд, смотрим два предыдущих
                     test_df = check_df[:index]
                     test_df = test_df[test_df['switch_to'] == 'down']
 
                     if len(test_df) > 1:
-                        # if trend < test_df.iloc[-1]['trend'] < test_df.iloc[-2]['trend']:
                         if test_df.iloc[-1]['trend'] < test_df.iloc[-2]['trend']:  # v.2
                             difference = (test_df.iloc[-1]['trend'] - spread_df.iloc[index-1]['trend']) / spread_df.iloc[index-1]['trend']
                             if difference > 0.005:  # v.1 test
                                 # текущий тренд - третий подряд падающий, открываем позицию шорт
                                 in_position = True
                                 df = add_new_position('short', time, close, size)
-                                # stop = trend
                                 stop = test_df.iloc[-1]['trend']  # v.2
-                                # take = close - close * difference
                                 mae = mfe = last_short = close
-                                # df['atr6'] = spread_df.iloc[index]['atr6']
-                                # df['atr12'] = spread_df.iloc[index]['atr12']
-                                # df['atr48'] = spread_df.iloc[index]['atr48']
         else:
             if last_short > 0:
                 if close > mae:
                     mae = close
                 elif close < mfe:
                     mfe = close
-                # сначала проверяем, не отстопило ли
-                if close > stop:  # ) or (close < take)
+                if close > stop:  # сначала проверяем, не отстопило ли
                     in_position = False
-                    # reason = 'stop' if close > stop else 'take'
                     df = close_new_position(df, 'stop', time, stop, 'short', mae, mfe)
+                    result_df = pd.concat([result_df, df], ignore_index=True)
+                    last_short = mae = mfe = stop = 0.0
+                elif close < spread_df.iloc[index]['bb_down']:  # теперь проверяем есть ли условие закрытия.
+                    in_position = False
+                    df = close_new_position(df, 'take', time, close, 'short', mae, mfe)
                     result_df = pd.concat([result_df, df], ignore_index=True)
                     last_short = mae = mfe = stop = 0.0
                 else:
@@ -2964,13 +2928,16 @@ def test_strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor,
                     mae = close
                 elif close > mfe:
                     mfe = close
-                # сначала проверяем, не отстопило ли
-                if close < stop:  # ) or (close > take)
+                if close < stop:  # сначала проверяем, не отстопило ли
                     in_position = False
-                    # reason = 'stop' if close < stop else 'take'
                     df = close_new_position(df, 'stop', time, stop, 'long', mae, mfe)
                     last_long = mae = mfe = stop = 0.0
                     result_df = pd.concat([result_df, df], ignore_index=True)
+                elif close > spread_df.iloc[index]['bb_up']:  # теперь проверяем есть ли условие закрытия.
+                    in_position = False
+                    df = close_new_position(df, 'take', time, close, 'long', mae, mfe)
+                    result_df = pd.concat([result_df, df], ignore_index=True)
+                    last_long = mae = mfe = stop = 0.0
                 else:
                     # тогда смотрим не пора ли передвинуть стоп
                     test_df = check_df[:index]

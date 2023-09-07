@@ -184,8 +184,6 @@ def fetch_securities_list(headers, sector):
     # else:
 
 
-
-
 def fetch_alor_history_price(headers, asset, start_date, end_date):
     # Пример авторизованного GET-запроса
     api_url = f'https://api.alor.ru/md/v2/history?symbol={asset}&exchange=MOEX&tf={tf_5m}&from={int(start_date)}' \
@@ -204,18 +202,16 @@ def fetch_alor_history_price(headers, asset, start_date, end_date):
         return pd.DataFrame()
 
 
-def main():
-
-    headers = autorization()
-    list = fetch_securities_list(headers, "FOND")  #FORTS, FOND, CURR
-    sec_list = list['symbol']
-    end_date = int(datetime.datetime.now().timestamp())
-    start_date = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
-    # start_date = end_date - 1000*tf_5m
-    # for asset in sec_list:
-        # ass_prices = get_history_price(headers, asset, start_date, end_date)
-
-
-
-
-main()
+# def main():
+#
+#     headers = autorization()
+#     list = fetch_securities_list(headers, "FOND")  #FORTS, FOND, CURR
+#     sec_list = list['symbol']
+#     end_date = int(datetime.datetime.now().timestamp())
+#     start_date = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
+#     # start_date = end_date - 1000*tf_5m
+#     # for asset in sec_list:
+#         # ass_prices = get_history_price(headers, asset, start_date, end_date)
+#
+#
+# main()
