@@ -10,6 +10,7 @@ import ccxt
 import bin_utils as modul
 import byb_utils as modul_byb
 import talib
+import indicators as ind
 
 tf_5m = 5 * 60
 tf_5m_str = '5m'
@@ -471,7 +472,7 @@ def get_distance_selected_list(lookback):
                         new_row = modul.get_statistics(future, future2, coin1_hist, coin2_hist, False)
                         if float(new_row.iloc[0]['stat_pair']) < 0.1:
                             df = modul.make_spread_df(coin1_hist, coin2_hist, last_to_end=True, tf=tf_5m)
-                            dev_df, low_dev, hl_dev, abnorm_tri = modul.get_max_deviation_from_sma(df, 240)
+                            dev_df, low_dev, hl_dev, abnorm_tri = ind.get_max_deviation_from_sma(df, 240)
                             max_dev = dev_df['max_deviation'].max()
                             mean_dev = dev_df['max_deviation'].mean()
                             all_counts = len(dev_df)

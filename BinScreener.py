@@ -9,6 +9,7 @@ from pathlib import Path
 import ccxt
 import bin_utils as modul
 import talib
+import indicators as ind
 
 tf_5m = 5 * 60
 tf_5m_str = '5m'
@@ -566,7 +567,7 @@ def get_triangle_selected_list(lookback):
                             df = modul.make_spread_df(coin1_hist, coin2_hist, last_to_end=True, tf=tf_5m)
                             time_round, time_to_end = modul.check_for_touch_bb(df, 1000, 1)
 
-                            dev_df = modul.get_max_deviation_from_sma(df, 1000)
+                            dev_df = ind.get_max_deviation_from_sma(df, 1000)
                             try:
                                 max_dev = dev_df['max_deviation'].max()
                                 mean_dev = dev_df['max_deviation'].mean()
@@ -734,7 +735,7 @@ def calculate_checkpairs_position():
         df = modul.make_spread_df(df_coin1, df_coin2, True, tf_5m)
 
         # Рассчитаем показатели статистики
-        df = modul.zscore_calculating(df, 240)
+        df = ind.zscore_calculating(df, 240)
         df['sma'] = talib.SMA(df.close, 240)
         df_coin1['sma'] = talib.SMA(df_coin1.close, 240)
         df_coin2['sma'] = talib.SMA(df_coin2.close, 240)

@@ -36,7 +36,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
         pivot_now = all_pivots[i - pp_prd]
         if not pd.isna(pivot_now):
             if not pd.isna(spread_df.iloc[i-1]['center']):
-                spread_df.at[i, 'center'] = (spread_df.iloc[i -1]['center'] * 2  + pivot_now) / 3
+                spread_df.at[i, 'center'] = (spread_df.iloc[i -1]['center'] * 2 + pivot_now) / 3
             else:
                 spread_df.at[i, 'center'] = pivot_now
         else:
@@ -250,7 +250,7 @@ def get_selected_list(start_time, end_time, lookback):
                         new_row = modul.get_statistics(future, future2, coin1_hist, coin2_hist, False)
                         if float(new_row.iloc[0]['stat_pair']) < 0.1:
                             df = modul.make_spread_df(coin1_hist, coin2_hist, last_to_end=True, tf=tf_5m)
-                            dev_df = modul.get_max_deviation_from_sma(df, 1000)
+                            dev_df = ind.get_max_deviation_from_sma(df, 1000)
                             try:
                                 max_dev = dev_df['max_deviation'].max()
                                 mean_dev = dev_df['max_deviation'].mean()
@@ -577,13 +577,30 @@ def walk_forward_pump_portfolio_testing(start_time, end_time, scan_back, step_fo
 
 def single_strategy_testing(start_time, end_time):
 
-    all_futures = modul.get_all_futures()
+    # all_futures = modul.get_all_futures()
+    all_futures = ['1000LUNCUSDT', '1000PEPEUSDT', '1000SHIBUSDT', '1INCHUSDT', 'AAVEUSDT',
+                   'ADAUSDT', 'AGIXUSDT', 'ALGOUSDT', 'AMBUSDT', 'ANTUSDT', 'APEUSDT',
+                   'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATOMUSDT',
+                   'AVAXUSDT', 'AXSUSDT', 'BAKEUSDT', 'BANDUSDT', 'BCHUSDT',
+                   'BLZUSDT', 'BNBUSDT', 'BTCUSDT', 'C98USDT', 'CELOUSDT', 'CFXUSDT', 'CHZUSDT',
+                   'COMPUSDT', 'CRVUSDT', 'CYBERUSDT', 'DASHUSDT', 'DODOXUSDT', 'DOGEUSDT', 'DOTUSDT', 'DYDXUSDT',
+                   'EOSUSDT', 'ETCUSDT', 'FETUSDT', 'FILUSDT', 'FTMUSDT',
+                   'GALAUSDT', 'GALUSDT', 'GMTUSDT', 'GRTUSDT', 'GTCUSDT', 'HBARUSDT', 'ICPUSDT', 'IMXUSDT', 'INJUSDT',
+                   'KAVAUSDT', 'KNCUSDT', 'LDOUSDT', 'LEVERUSDT', 'LINAUSDT', 'LINKUSDT',
+                   'LPTUSDT', 'LTCUSDT', 'LUNA2USDT', 'MAGICUSDT', 'MANAUSDT', 'MASKUSDT', 'MATICUSDT',
+                   'MKRUSDT', 'MTLUSDT', 'NEARUSDT', 'OCEANUSDT',
+                   'OPUSDT', 'PENDLEUSDT', 'PEOPLEUSDT', 'RDNTUSDT', 'REEFUSDT', 'RNDRUSDT', 'RUNEUSDT',
+                   'SANDUSDT', 'SEIUSDT', 'SFPUSDT', 'SNXUSDT', 'SOLUSDT', 'STMXUSDT',
+                   'STXUSDT', 'SUIUSDT', 'SXPUSDT', 'THETAUSDT', 'TOMOUSDT', 'TRUUSDT', 'TRXUSDT',
+                   'UNFIUSDT', 'UNIUSDT', 'WAVESUSDT', 'WLDUSDT', 'WOOUSDT', 'XMRUSDT', 'XRPUSDT', 'XVGUSDT', 'YGGUSDT']
+
     trades_df = pd.DataFrame()
     for i in range(len(all_futures)):
-        future = all_futures.iloc[i]["id"]
+        # future = all_futures.iloc[i]["id"]
+        future = all_futures[i]
         print(f'Тестируем монету {future}')
-        df = test_strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
-        # df = strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
+        # df = test_strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
+        df = strategy_pp_supertrend_v2(future, start_time, end_time, 2, 3, 10)
         if len(df) > 0:
             df['coin'] = future
             df['link'] = f'BINANCE:{future}.P'
@@ -601,6 +618,7 @@ def single_strategy_testing(start_time, end_time):
     filename3 = f"single_result_period.csv"
     filepath3 = Path("testing", filename3)
     result_df.to_csv(filepath3, index=False, sep="\t")
+
 
 def single_strategy_testing_moex(start_time, end_time):
     headers = alor_modul.autorization()
@@ -2193,7 +2211,7 @@ def strategy_zscore(coin1, coin2, start_date, end_date, lookback, level):
     df_coin2 = modul.get_sql_history_price(coin2, connection, start_date, end_date)
     spread_df = modul.make_spread_df(df_coin1, df_coin2, last_to_end=True, tf=tf_5m)
 
-    spread_df = modul.zscore_calculating(spread_df, lookback)
+    spread_df = ind.zscore_calculating(spread_df, lookback)
     total, total_per, per_no_commis = 0, 0, 0
 
     spread_df['zsc_shift'] = spread_df.shift(periods=1)['zscore']
@@ -3105,13 +3123,13 @@ if __name__ == '__main__':
     # test_strategy_pp_supertrend('1000XECUSDT', start_time, end_time, 2, 3, 10)
     # check_list_for_strategies(start_time, end_time, 5, 240)
 
-    start_time = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
-    end_time = datetime.datetime(2023, 9, 1, 0, 0, 0).timestamp()
+    start_time = datetime.datetime(2023, 8, 31, 0, 0, 0).timestamp()
+    end_time = datetime.datetime(2023, 9, 8, 0, 0, 0).timestamp()
     # walk_forward_scaning(start_time, end_time, 9000, 3, 'only_coint')
     # walk_forward_testing(start_time, end_time, 9000, 3, 1000, 'only_coint')
     # walk_forward_testing(start_time, end_time, 2000, 2, 1000, 'only_coint')
-    # single_strategy_testing(start_time, end_time)
-    single_strategy_testing_moex(start_time, end_time)
+    single_strategy_testing(start_time, end_time)
+    # single_strategy_testing_moex(start_time, end_time)
     # TODO
     # 1.3 Вход на развороте цены (поискать методы как ловить разворот)
     # 4. Найти обратную стратегию - если цена уходит от средней - заходить по тренду.

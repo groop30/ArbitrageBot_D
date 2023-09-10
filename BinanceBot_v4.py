@@ -1,6 +1,3 @@
-# Основной уклон в данной версии - на ручную торговлю
-# Стратегии задаются вручную, робот лишь следит что бы не пропустить вход/выход
-
 import key
 import datetime
 import pandas as pd
@@ -10,6 +7,7 @@ import bin_utils as modul
 from os import path
 import ccxt
 import talib
+import indicators as ind
 
 binance = ccxt.binanceusdm({
     'enableRateLimit': True,
@@ -339,7 +337,7 @@ def check_for_open():
                 if -0.6 < l_diff_per < 0.6:
                     continue
                 # для zscore вход при начале уменьшения zsc, если он уже зашел за уровень
-                df = modul.zscore_calculating(df, lookback)
+                df = ind.zscore_calculating(df, lookback)
                 l_zscore = df.iloc[-1]['zscore']
                 pre_zscore = df.iloc[-2]['zscore']
                 zsc_diff = l_zscore - pre_zscore

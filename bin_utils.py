@@ -18,6 +18,7 @@ from statsmodels.tsa.vector_ar.vecm import coint_johansen
 import sqlalchemy as sql
 from sqlalchemy import bindparam
 from decimal import Decimal
+import indicators as ind
 
 binance = ccxt.binanceusdm({
     'enableRateLimit': True,
@@ -347,22 +348,6 @@ def sql_table_to_csv(table_name):
 # Процедуры для расчета эконометрических данных
 #
 # ######################################################################
-def zscore_calculating(df, lookback):
-
-    if lookback > len(df):
-        lookback = len(df)
-
-    # добавляем колонку с sma (A)
-    df['z_sma'] = talib.SMA(df.close, lookback)
-    # добавляем колонку с отклонением (B)
-    df['z_std'] = df.close.rolling(lookback).std()
-    # добавляем колонку с разницей sma-цена (A-close)=C
-    df['z_diff'] = df['close'] - df['z_sma']
-    # рассчитываем zscore как C/B
-    df['zscore'] = df['z_diff']/df['z_std']
-    df.drop(labels=['z_sma', 'z_std'], axis=1, inplace=True)
-    return df
-
 
 def get_delta_adf(data1, data2):
     # Perform ADF test on the closing prices of fetched data
@@ -1576,7 +1561,7 @@ def calculate_historical_profit(hist_df, pair, strategy, sma, up, down):
     :param down: уровень нижней зоны
     :return: строка датафрейма с результатами
     """
-    hist_df = zscore_calculating(hist_df, sma)
+    hist_df = ind.zscore_calculating(hist_df, sma)
     total, total_per, per_no_commis = 0, 0, 0
 
     if strategy == 'zscore':
@@ -1653,100 +1638,6 @@ def get_selected_pairs(connection):
         check_df = pd.read_sql(sql=query, con=conn)
 
     return check_df
-
-
-def get_max_deviation_from_sma(df, lookback):
-    # Принцип расчета:
-    # 1. кол. правильных треугольников (изменение уровня дна < 30% от высоты) >30 на 2000
-    # 1.1 неправильные считаем отдельно.
-    # 2. кол отфильтрованных по времени (если > полураспада - не учитываем в расчетах) <=2
-    # 3. кол отфильтрованных по маленькому проценту (< bb-1 (bb-1>0.6%) - не учитываем)
-    # 4. средний и макс вынос на правильных треугольниках
-
-    # norm_dev = list()
-    # norm_dev = pd.DataFrame(columns=['close', 'sma', 'From', 'To', 'len', 'max_deviation'])
-    full_dev = pd.DataFrame()
-    # добавим данные для расчета
-    # df["sma"] = df["close"].rolling(window=lookback, min_periods=1).mean()
-    df['bb_up'], df['sma'], df['bb_down'] = talib.BBANDS(df.close, lookback, 1, 1, 0)
-    df["signal"] = 0.0
-    df["signal"] = np.where(df["close"] > df["sma"], 1.0, 0.0)
-    df["position"] = df["signal"].diff()
-    df = df.iloc[lookback:]
-
-    # получим таблицу с временами пересечения SMA
-    from_time = df[(df["position"] == 1) | (df["position"] == -1)]
-    from_time = from_time.iloc[:-1]
-    from_time = from_time.reset_index()
-    from_time.drop(["open", "high", "low", "close", "sma", "signal", "position", "bb_up", "bb_down"], axis=1, inplace=True)
-    from_time.rename(columns={"startTime": "From"}, inplace=True)
-    from_time.rename(columns={"time": "FromTimestm"}, inplace=True)
-
-    to_time = df[(df["position"] == 1) | (df["position"] == -1)]
-    to_time = to_time.iloc[1:]
-    to_time = to_time.reset_index()
-    to_time.drop(["open", "high", "low", "close", "sma", "signal", "position", "bb_up", "bb_down"],
-                 axis=1, inplace=True)
-    to_time.rename(columns={"startTime": "To"}, inplace=True)
-    to_time.rename(columns={"time": "ToTimestm"}, inplace=True)
-
-    concated_from_to_time = pd.concat([from_time, to_time], axis=1)
-    concated_from_to_time.drop(["index"], axis=1, inplace=True)
-
-    # max_deviations_between_crossovers = pd.DataFrame()
-    # abnormal_count = 0
-    # low_count = 0
-    # hl_count = 0
-    halflive = lookback/3*2
-    for _, row in concated_from_to_time.iterrows():
-        # df_slice = df.loc[row["FromTimestm"]:row["ToTimestm"]]
-        df_slice = df[(df.time >= row['FromTimestm']) & (df.time <= row['ToTimestm'])]
-
-        first_cross = df_slice.iloc[0]['sma']
-        bb_up = df_slice.iloc[0]['bb_up']
-        bb_down = df_slice.iloc[0]['bb_down']
-        # index_of_max_deviation = (df_slice['close'] - df_slice['sma']).abs().idxmax()  # откл от текущего знач sma
-        index_of_max_deviation = (df_slice['close'] - first_cross).abs().idxmax()  # индекс строки с макс отклонением
-        row_with_max_deviation = df_slice.loc[[index_of_max_deviation], ['close', 'sma']]  # строка с макс отклонением
-
-        max_dev = row_with_max_deviation
-        max_dev["From"] = row["From"]
-        max_dev["To"] = row["To"]
-        max_dev["len"] = len(df_slice)
-
-        # %откл от текущего знач sma
-        # max_dev["max_deviation"] = (max_dev["close"] - max_dev["sma"])/max_dev["sma"]*100
-
-        # %откл от первого пересечения sma
-        max_dev["max_deviation"] = abs((max_dev["close"] - first_cross) / first_cross * 100)
-        max_deviation = max_dev.iloc[0]["max_deviation"]
-
-        if bb_down < max_dev.iloc[0]["close"] < bb_up:
-            max_dev["low_count"] = 1
-            max_dev["norm_count"] = 0
-            max_dev["abnormal_count"] = 0
-            max_dev["hl_count"] = 0
-        else:
-            # рассчитаем изменение дна треугольника
-            last_cross = df_slice.iloc[len(df_slice)-1]['sma']
-            base_div = abs((last_cross - first_cross) / first_cross * 100)
-            if base_div <= max_deviation/3:
-                max_dev["low_count"] = 0
-                max_dev["norm_count"] = 1
-                max_dev["abnormal_count"] = 0
-                max_dev["hl_count"] = 0
-            else:
-                max_dev["low_count"] = 0
-                max_dev["norm_count"] = 1
-                max_dev["abnormal_count"] = 1
-                max_dev["hl_count"] = 0
-
-        if len(df_slice) > halflive:
-            max_dev["hl_count"] = 1
-
-        full_dev = pd.concat([full_dev, max_dev], axis=0, ignore_index=True)
-
-    return full_dev
 
 
 def check_for_touch_bb(df, lookback, sigma):
