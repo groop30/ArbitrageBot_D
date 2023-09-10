@@ -596,8 +596,8 @@ def single_strategy_testing(start_time, end_time):
 
     trades_df = pd.DataFrame()
     for i in range(len(all_futures)):
-        # future = all_futures.iloc[i]["id"]
-        future = all_futures[i]
+        future = all_futures.iloc[i]["id"]
+        # future = all_futures[i]
         print(f'Тестируем монету {future}')
         # df = test_strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
         df = strategy_pp_supertrend_v2(future, start_time, end_time, 2, 3, 10)
