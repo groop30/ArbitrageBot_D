@@ -577,22 +577,22 @@ def walk_forward_pump_portfolio_testing(start_time, end_time, scan_back, step_fo
 
 def single_strategy_testing(start_time, end_time):
 
-    # all_futures = modul.get_all_futures()
-    all_futures = ['1000LUNCUSDT', '1000PEPEUSDT', '1000SHIBUSDT', '1INCHUSDT', 'AAVEUSDT',
-                   'ADAUSDT', 'AGIXUSDT', 'ALGOUSDT', 'AMBUSDT', 'ANTUSDT', 'APEUSDT',
-                   'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATOMUSDT',
-                   'AVAXUSDT', 'AXSUSDT', 'BAKEUSDT', 'BANDUSDT', 'BCHUSDT',
-                   'BLZUSDT', 'BNBUSDT', 'BTCUSDT', 'C98USDT', 'CELOUSDT', 'CFXUSDT', 'CHZUSDT',
-                   'COMPUSDT', 'CRVUSDT', 'CYBERUSDT', 'DASHUSDT', 'DODOXUSDT', 'DOGEUSDT', 'DOTUSDT', 'DYDXUSDT',
-                   'EOSUSDT', 'ETCUSDT', 'FETUSDT', 'FILUSDT', 'FTMUSDT',
-                   'GALAUSDT', 'GALUSDT', 'GMTUSDT', 'GRTUSDT', 'GTCUSDT', 'HBARUSDT', 'ICPUSDT', 'IMXUSDT', 'INJUSDT',
-                   'KAVAUSDT', 'KNCUSDT', 'LDOUSDT', 'LEVERUSDT', 'LINAUSDT', 'LINKUSDT',
-                   'LPTUSDT', 'LTCUSDT', 'LUNA2USDT', 'MAGICUSDT', 'MANAUSDT', 'MASKUSDT', 'MATICUSDT',
-                   'MKRUSDT', 'MTLUSDT', 'NEARUSDT', 'OCEANUSDT',
-                   'OPUSDT', 'PENDLEUSDT', 'PEOPLEUSDT', 'RDNTUSDT', 'REEFUSDT', 'RNDRUSDT', 'RUNEUSDT',
-                   'SANDUSDT', 'SEIUSDT', 'SFPUSDT', 'SNXUSDT', 'SOLUSDT', 'STMXUSDT',
-                   'STXUSDT', 'SUIUSDT', 'SXPUSDT', 'THETAUSDT', 'TOMOUSDT', 'TRUUSDT', 'TRXUSDT',
-                   'UNFIUSDT', 'UNIUSDT', 'WAVESUSDT', 'WLDUSDT', 'WOOUSDT', 'XMRUSDT', 'XRPUSDT', 'XVGUSDT', 'YGGUSDT']
+    all_futures = modul.get_all_futures()
+    # all_futures = ['1000LUNCUSDT', '1000PEPEUSDT', '1000SHIBUSDT', '1INCHUSDT', 'AAVEUSDT',
+    #                'ADAUSDT', 'AGIXUSDT', 'ALGOUSDT', 'AMBUSDT', 'ANTUSDT', 'APEUSDT',
+    #                'API3USDT', 'APTUSDT', 'ARBUSDT', 'ARPAUSDT', 'ARUSDT', 'ASTRUSDT', 'ATOMUSDT',
+    #                'AVAXUSDT', 'AXSUSDT', 'BAKEUSDT', 'BANDUSDT', 'BCHUSDT',
+    #                'BLZUSDT', 'BNBUSDT', 'BTCUSDT', 'C98USDT', 'CELOUSDT', 'CFXUSDT', 'CHZUSDT',
+    #                'COMPUSDT', 'CRVUSDT', 'CYBERUSDT', 'DASHUSDT', 'DODOXUSDT', 'DOGEUSDT', 'DOTUSDT', 'DYDXUSDT',
+    #                'EOSUSDT', 'ETCUSDT', 'FETUSDT', 'FILUSDT', 'FTMUSDT',
+    #                'GALAUSDT', 'GALUSDT', 'GMTUSDT', 'GRTUSDT', 'GTCUSDT', 'HBARUSDT', 'ICPUSDT', 'IMXUSDT', 'INJUSDT',
+    #                'KAVAUSDT', 'KNCUSDT', 'LDOUSDT', 'LEVERUSDT', 'LINAUSDT', 'LINKUSDT',
+    #                'LPTUSDT', 'LTCUSDT', 'LUNA2USDT', 'MAGICUSDT', 'MANAUSDT', 'MASKUSDT', 'MATICUSDT',
+    #                'MKRUSDT', 'MTLUSDT', 'NEARUSDT', 'OCEANUSDT',
+    #                'OPUSDT', 'PENDLEUSDT', 'PEOPLEUSDT', 'RDNTUSDT', 'REEFUSDT', 'RNDRUSDT', 'RUNEUSDT',
+    #                'SANDUSDT', 'SEIUSDT', 'SFPUSDT', 'SNXUSDT', 'SOLUSDT', 'STMXUSDT',
+    #                'STXUSDT', 'SUIUSDT', 'SXPUSDT', 'THETAUSDT', 'TOMOUSDT', 'TRUUSDT', 'TRXUSDT',
+    #                'UNFIUSDT', 'UNIUSDT', 'WAVESUSDT', 'WLDUSDT', 'WOOUSDT', 'XMRUSDT', 'XRPUSDT', 'XVGUSDT', 'YGGUSDT']
 
     trades_df = pd.DataFrame()
     for i in range(len(all_futures)):
@@ -2600,7 +2600,7 @@ def strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor, atr_
     # spread_df = modul.make_spread_df(df_coin1, df_coin2, last_to_end=True, tf=tf_5m)
     result_df = df = pd.DataFrame()
 
-    spread_df = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
+    spread_df = ind.pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
     in_position = False
     last_short = last_long = 0.0
     mae = mfe = 0.0
@@ -2716,14 +2716,14 @@ def strategy_pp_supertrend_v2(coin1, start_date, end_date, pp_prd, atr_factor, a
 
     start_date = start_date - 500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
     spread_df = modul.get_sql_history_price(coin1, connection, start_date, end_date)
-    # spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
+    spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
     if len(spread_df) == 0:
         return pd.DataFrame()
 
     spread_df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
     result_df = df = pd.DataFrame()
 
-    spread_df = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
+    spread_df = ind.pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
     in_position = False
     last_short = last_long = 0.0
     mae = mfe = 0.0
@@ -2866,7 +2866,7 @@ def test_strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor,
     # spread_df = modul.make_spread_df(df_coin1, df_coin2, last_to_end=True, tf=tf_5m)
     result_df = df = pd.DataFrame()
 
-    spread_df = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
+    spread_df = ind.pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
     spread_df['bb_up'], _, spread_df['bb_down'] = talib.BBANDS(spread_df.close, 288, 3, 3, 0)
     in_position = False
     last_short = last_long = 0.0
@@ -2997,7 +2997,7 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
     spread_df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
     result_df = df = pd.DataFrame()
 
-    spread_df = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
+    spread_df = ind.pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
     in_position = False
     last_short = last_long = 0.0
     mae = mfe = 0.0
@@ -3109,8 +3109,8 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
 
 if __name__ == '__main__':
     # start_time = datetime.datetime.now().timestamp() - 2000 * tf_5m
-    start_time = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
-    end_time = datetime.datetime(2023, 9, 1, 0, 0, 0).timestamp()
+    # start_time = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
+    # end_time = datetime.datetime(2023, 9, 1, 0, 0, 0).timestamp()
     # test_oc_strategy('AAVEUSDT', 'AXSUSDT', start_time, True)
     # test_oc_str_2takes('1000XECUSDT', 'SPELLUSDT', start_time, False)
     # strategy_bb1_3_stop4('1000XECUSDT', 'TRBUSDT', start_time, 1000, end_time)
@@ -3123,8 +3123,8 @@ if __name__ == '__main__':
     # test_strategy_pp_supertrend('1000XECUSDT', start_time, end_time, 2, 3, 10)
     # check_list_for_strategies(start_time, end_time, 5, 240)
 
-    start_time = datetime.datetime(2023, 8, 31, 0, 0, 0).timestamp()
-    end_time = datetime.datetime(2023, 9, 8, 0, 0, 0).timestamp()
+    start_time = datetime.datetime(2023, 1, 1, 0, 0, 0).timestamp()
+    end_time = datetime.datetime(2023, 9, 1, 0, 0, 0).timestamp()
     # walk_forward_scaning(start_time, end_time, 9000, 3, 'only_coint')
     # walk_forward_testing(start_time, end_time, 9000, 3, 1000, 'only_coint')
     # walk_forward_testing(start_time, end_time, 2000, 2, 1000, 'only_coint')
