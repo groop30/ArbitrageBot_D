@@ -2858,10 +2858,10 @@ def flat_filter(df, direction):
         df = df[df['switch'] == True]
         # Проверяем, есть ли вынос на последнем тренде
         if direction == 'up':
-            if df.iloc[-1]['prev_up'] > df.iloc[-3]['trend']:
+            if df.iloc[-1]['prev_down'] < df.iloc[-3]['trend']:
                 flat = False
         else:
-            if df.iloc[-1]['prev_down'] < df.iloc[-3]['trend']:
+            if df.iloc[-1]['prev_up'] > df.iloc[-3]['trend']:
                 flat = False
         # Если выноса нет, смотрим последние 4 пары UP/DOWN
         if flat:
@@ -2916,7 +2916,7 @@ def strategy_pp_supertrend_v3(coin1, start_date, end_date, pp_prd, atr_factor, a
 
                     if len(test_df) > 1:
                         if test_df.iloc[-1]['trend'] > test_df.iloc[-2]['trend']:  # v.2
-                            is_it_flat = flat_filter(spread_df[:index], 'down')
+                            is_it_flat = flat_filter(spread_df[:index+1], 'down')
                             if not is_it_flat:
                                 difference = (spread_df.iloc[index - 1]['trend'] - test_df.iloc[-1]['trend']) / test_df.iloc[-1][
                                     'trend']
@@ -2931,7 +2931,7 @@ def strategy_pp_supertrend_v3(coin1, start_date, end_date, pp_prd, atr_factor, a
                     test_df = test_df[test_df['switch_to'] == 'down']
                     if len(test_df) > 1:
                         if test_df.iloc[-1]['trend'] < test_df.iloc[-2]['trend']:
-                            is_it_flat = flat_filter(spread_df[:index], 'up')
+                            is_it_flat = flat_filter(spread_df[:index+1], 'up')
                             if not is_it_flat:
                                 difference = (test_df.iloc[-1]['trend'] - spread_df.iloc[index - 1]['trend']) / \
                                              spread_df.iloc[index - 1]['trend']
