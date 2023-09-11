@@ -1043,25 +1043,8 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
     """
 
     df["gap"] = df[date_column_label].sort_values().diff() > timeframe*1000
-
     df['time_from'] = df[date_column_label].shift(1)
     intervals = []
-
-    # previous_timestamp: Optional[int] = None
-    # gap_finded = False
-    # for d in df.to_dict(orient="records"):
-    #     if previous_timestamp:
-    #         if gap_finded:
-    #             intervals.append([previous_timestamp, d[date_column_label]])
-    #             gap_finded = False
-    #         if d["gap"]:
-    #             gap_finded = True
-    #             previous_timestamp = d[date_column_label]
-    #             continue
-
-        # previous_timestamp = d[date_column_label]
-        # if not d["gap"]:
-        #    continue
     df_gaps = df[df['gap']==True]
 
     for d in df_gaps.to_dict(orient="records"):
