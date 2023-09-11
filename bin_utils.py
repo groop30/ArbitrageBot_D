@@ -819,7 +819,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                         # ####################
                         spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
                         spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-                elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']: # был тренд вниз
+                elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']:  # был тренд вниз
                     if prev_trend >= close:  # пробития тренда не было, значит тренд остается
                         spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
                         # ####################
@@ -1047,8 +1047,8 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
     df['time_from'] = df[date_column_label].shift(1)
     intervals = []
 
-    previous_timestamp: Optional[int] = None
-    gap_finded = False
+    # previous_timestamp: Optional[int] = None
+    # gap_finded = False
     # for d in df.to_dict(orient="records"):
     #     if previous_timestamp:
     #         if gap_finded:
@@ -1064,7 +1064,7 @@ def get_fetch_intervals(df: pd.DataFrame, date_column_label: str, timeframe: int
         #    continue
     df_gaps = df[df['gap']==True]
 
-    for  d in df_gaps.to_dict(orient="records"):
+    for d in df_gaps.to_dict(orient="records"):
         intervals.append([d['time_from'], d[date_column_label]])
 
     df.drop(labels=["gap", "time_from"], axis=1, inplace=True)
@@ -2199,6 +2199,7 @@ def edit_limit_order(order_id, coin, p_side, new_size, l_price, exchange="Binanc
         res_modify = place_limit_order(coin, l_price, new_size, p_side, exchange)
         return True, res_modify
 
+
 # отмена открытого ордера
 def cancel_limit_order(order_id, coin, exchange="Binance"):
 
@@ -2371,6 +2372,7 @@ def manage_limit_order(order_id, coin, p_size, p_side, count=1, exchange="Binanc
 
 
 if __name__ == '__main__':
-    sql_table_to_csv('bin_to_close')
-    sql_table_to_csv('bin_to_check')
-    sql_table_to_csv('orders_log')
+    # sql_table_to_csv('bin_to_close')
+    # sql_table_to_csv('bin_to_check')
+    # sql_table_to_csv('orders_log')
+    sql_table_to_csv('AAVEUSDT')
