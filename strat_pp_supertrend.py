@@ -76,13 +76,6 @@ def check_for_open():
         history_df = modul.get_sql_history_price(future, connection, start_date, end_date)
         history_df = modul.convert_to_tf(history_df, 900) #15 min timeframe
 
-        this_minute = datetime.datetime.now().minute
-        current_candle = int(this_minute/15)*15
-        if current_candle != this_minute:
-            hist_last_row = history_df.iloc[-1]['startTime']
-            hist_last_min = pd.to_datetime(hist_last_row).minute
-            if hist_last_min == current_candle:
-                history_df = history_df[:-1]  #бираем последнюю свечу, она еще не закрыта.
         history_df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
         history_df = modul.pivot_point_supertrend(history_df, 2, 3, 10)
 

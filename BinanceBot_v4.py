@@ -547,7 +547,7 @@ def check_for_close():
             coin1_df = modul.get_last_price(coin1)
             l_price = coin1_df.iloc[0]['bid']
             end_time = datetime.datetime.now().timestamp()
-            start_time = datetime.datetime.now().timestamp() - 300 * tf_5m
+            start_time = datetime.datetime.now().timestamp() - 1500 * tf_5m
             df = modul.get_sql_history_price(coin1, connection, start_time, end_time)
             l_sma = 0
         else:
@@ -686,6 +686,7 @@ def check_for_close():
                 if stop < l_price:
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
+                    df = modul.convert_to_tf(df, 900)  # 15 min timeframe
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
                     df = modul.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'down']
@@ -698,6 +699,7 @@ def check_for_close():
                 if stop > l_price:
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
+                    df = modul.convert_to_tf(df, 900)  # 15 min timeframe
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
                     df = modul.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'up']
