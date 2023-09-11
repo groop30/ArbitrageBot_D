@@ -171,38 +171,57 @@ class App(QWidget):
     def click_close(self, limit):
         pair = self.ui.textPairTrade.text()
         new_row = self.ui.tradingOpenPos.currentRow()
-        pair2 = self.ui.tradingOpenPos.item(new_row, 0).text()
-        if pair != pair2:
-            print("Проверьте пару для закрытия! Отличается от выбранной в таблице!")
-            return False
         coin1_id = int(self.ui.tradingOpenPos.item(new_row, 9).text())
-        coin2_id = int(self.ui.tradingOpenPos.item(new_row, 10).text())
+        coin2_id = self.ui.tradingOpenPos.item(new_row, 10).text()
         size1 = float(self.ui.tradingOpenPos.item(new_row, 11).text())
-        size2 = float(self.ui.tradingOpenPos.item(new_row, 12).text())
         going_to = self.ui.tradingOpenPos.item(new_row, 2).text()
         exchange = self.ui.tradingOpenPos.item(new_row, 13).text()
-        coin1, coin2 = modul.pair_to_coins(pair)
-        _, _, l_price = modul.get_last_spread_price(coin1, coin2)
-        try:
-            stop = self.ui.tradingOpenPos.item(new_row, 4).text()
-            stop = float(stop)
-            if (going_to == 'UP' and l_price > stop) or (going_to == 'DOWN' and l_price < stop):
-                # Значит закрываемся не по превышению стопа, значит стоп не передаем
+        if coin2_id != 'nan':
+            pair2 = self.ui.tradingOpenPos.item(new_row, 0).text()
+            if pair != pair2:
+                print("Проверьте пару для закрытия! Отличается от выбранной в таблице!")
+                return False
+            coin2_id = int(coin2_id)
+            size2 = float(self.ui.tradingOpenPos.item(new_row, 12).text())
+            coin1, coin2 = modul.pair_to_coins(pair)
+            _, _, l_price = modul.get_last_spread_price(coin1, coin2)
+            try:
+                stop = self.ui.tradingOpenPos.item(new_row, 4).text()
+                stop = float(stop)
+                if (going_to == 'UP' and l_price > stop) or (going_to == 'DOWN' and l_price < stop):
+                    # Значит закрываемся не по превышению стопа, значит стоп не передаем
+                    stop = 0.0
+            except:
                 stop = 0.0
-        except:
-            stop = 0.0
 
-        # создаем строку с данными
-        df_row = pd.DataFrame({
-            'coin1': [coin1],
-            'coin2': [coin2],
-            'going_to': [going_to],
-            'cl_price': [round(l_price, 6)],
-            'stop': [round(stop, 6)],
-        },
-            index=None)
-        modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price, df_row, limit, exchange)
-        self.refresh_opened()
+            # создаем строку с данными
+            df_row = pd.DataFrame({
+                'coin1': [coin1],
+                'coin2': [coin2],
+                'going_to': [going_to],
+                'cl_price': [round(l_price, 6)],
+                'stop': [round(stop, 6)],
+            },
+                index=None)
+            modul.close_pair_position(connection, coin1_id, coin2_id, coin1, coin2, size1, size2, l_price, df_row, limit, exchange)
+            self.refresh_opened()
+        else:
+            l_price = modul.get_last_price(pair)
+            if going_to == 'UP':
+                last_price = l_price.iloc[0]['ask']
+            else:
+                last_price = l_price.iloc[0]['bid']
+            stop = float(self.ui.tradingOpenPos.item(new_row, 4).text())
+            # создаем строку с данными
+            df_row = pd.DataFrame({
+                'coin1': [pair],
+                'going_to': [going_to],
+                'cl_price': [round(l_price, 6)],
+                'stop': [round(stop, 6)],
+            },
+                index=None)
+            modul.close_single_position(connection, coin1_id, pair, size1, last_price, df_row, True, exchange)
+            self.refresh_opened()
 
     def delete_selected_pair(self):
         new_row = self.ui.tradingForCheck.currentRow()
