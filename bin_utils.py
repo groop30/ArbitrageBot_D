@@ -1023,13 +1023,25 @@ def convert_to_tf(df, tf):
     }
     if tf == 3600:
         tf_str = '1H'
+        multipl = 60
     elif tf == 900:
         tf_str = '15min'
+        multipl = 15
     else:
         tf_str = '5min'
+        multipl = 1
 
     df = df.resample(tf_str).apply(ohlc)
     df.reset_index(inplace=True)
+    if tf != 300:
+        this_minute = datetime.datetime.now().minute
+        current_candle = int(this_minute / multipl) * multipl
+        if current_candle != this_minute:
+            hist_last_row = df.iloc[-1]['startTime']
+            hist_last_min = pd.to_datetime(hist_last_row).minute
+            if hist_last_min == current_candle:
+                df = df[:-1]  # бираем последнюю свечу, она еще не закрыта.
+
     return df
 
 
