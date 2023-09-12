@@ -687,7 +687,7 @@ def check_for_close():
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
-                    df = modul.pivot_point_supertrend(df, 2, 3, 10)
+                    df = ind.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'down']
                     if len(check_df) > 1:
                         check_level = round(check_df.iloc[-1]['trend'], 7)
@@ -699,7 +699,7 @@ def check_for_close():
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
                     df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
-                    df = modul.pivot_point_supertrend(df, 2, 3, 10)
+                    df = ind.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'up']
                     if len(check_df) > 1:
                         check_level = round(check_df.iloc[-1]['trend'], 7)

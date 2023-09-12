@@ -9,7 +9,7 @@ import pyqtgraph as pg
 import datetime
 import BinScreener as screener
 import talib
-# import numpy as np
+import indicators as ind
 
 # from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
@@ -519,7 +519,7 @@ class App(QWidget):
                 self.ui.plotWidget.plot(df['line_up'], pen='b')
                 self.ui.plotWidget.plot(df['line_down'], pen='b')
             elif strategy == 'pp_supertrend':
-                df = modul.pivot_point_supertrend(df, 2, 3, 10)
+                df = ind.pivot_point_supertrend(df, 2, 3, 10)
                 self.ui.plotWidget.plot(df['trend'], pen='r')
             else:
                 df['bb_up'], df['sma'], df['bb_down'] = talib.BBANDS(df.close, strat_lkbk, bb_sigma, bb_sigma, 0)
@@ -598,7 +598,7 @@ class App(QWidget):
         if strategy == 'st_dev':
             df = modul.rolling_st_dev_channels(df, lookb_k, 1.5)
         elif strategy == 'pp_supertrend':
-            df = modul.pivot_point_supertrend(df, 2, 3, 10)
+            df = ind.pivot_point_supertrend(df, 2, 3, 10)
         else:
             df['bb_up'],_, df['bb_down'] = talib.BBANDS(df.close, lookb_k, 1, 1, 0)
             df['sma'] = df["close"].rolling(window=lookb_k, min_periods=1).mean()
