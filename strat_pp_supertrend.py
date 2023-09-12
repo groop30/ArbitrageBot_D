@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 import time
 import bin_utils as modul
-# import talib
+import indicators as ind
 # import numpy as np
 
 pd.options.mode.chained_assignment = None
