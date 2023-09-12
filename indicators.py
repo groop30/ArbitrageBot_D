@@ -77,6 +77,7 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
     spread_df['trend_down'] = np.nan
     spread_df['switch'] = False
     spread_df['switch_to'] = ''
+    trend_now = ''
     for i in range(atr_prd, len(spread_df)):
         prev_trend = spread_df.iloc[i - 1]['trend']
         prev_trend_down = spread_df.iloc[i - 1]['trend_down']
@@ -90,17 +91,19 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                 # ####################
                 spread_df.at[i, 'trend_down'] = dn[i]
                 spread_df.at[i, 'trend_up'] = up[i]
+                trend_now = 'down'
             else:
                 spread_df.at[i, 'trend'] = up[i]
                 spread_df.at[i, 'switch_to'] = 'up'
                 # ####################
                 spread_df.at[i, 'trend_down'] = dn[i]
                 spread_df.at[i, 'trend_up'] = up[i]
+                trend_now = 'up'
             spread_df.at[i, 'switch'] = True
 
         else:
             # смотрим предыдущие значения, что бы понять, какой был тренд
-            if prev_trend > prev_close:
+            if trend_now == 'down':
                 # значит был тренд вниз (down)
                 if prev_trend >= close:
                     # пробития тренда не было, значит тренд остается
@@ -116,11 +119,12 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                     spread_df.at[i, 'trend'] = max(prev_trend_up, up[i])
                     spread_df.at[i, 'switch'] = True
                     spread_df.at[i, 'switch_to'] = 'up'
+                    trend_now = 'up'
                     # ####################
                     spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
                     spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
 
-            elif prev_trend < prev_close:
+            else:
                 # значит был тренд вверх
                 if prev_trend <= close:
                     # пробития тренда не было, значит тренд остается
@@ -136,46 +140,47 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
                     spread_df.at[i, 'trend'] = min(prev_trend_down, dn[i])
                     spread_df.at[i, 'switch'] = True
                     spread_df.at[i, 'switch_to'] = 'down'
+                    trend_now = 'down'
                     # ####################
                     spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
                     spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-            else:
-                # значит тренд не изменился, что бы определить направление, смотрим на 2 свечи назад
-                if spread_df.iloc[i - 2]['trend'] < spread_df.iloc[i-2]['close']:  # был тренд вверх
-                    if prev_trend <= close:  # пробития тренда не было, значит тренд остается
-                        spread_df.at[i, 'trend'] = max(prev_trend, up[i])
-                        # ####################
-                        spread_df.at[i, 'trend_up'] = max(prev_trend, up[i])
-                        if prev_trend_down < close:
-                            spread_df.at[i, 'trend_down'] = dn[i]
-                        else:
-                            spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-                    else:
-                        # тренд пробит, меняем линию
-                        spread_df.at[i, 'trend'] = min(prev_trend_down, dn[i])
-                        spread_df.at[i, 'switch'] = True
-                        spread_df.at[i, 'switch_to'] = 'down'
-                        # ####################
-                        spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
-                        spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-                elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']: # был тренд вниз
-                    if prev_trend >= close:  # пробития тренда не было, значит тренд остается
-                        spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
-                        # ####################
-                        spread_df.at[i, 'trend_down'] = min(prev_trend, dn[i])
-                        if prev_trend_up > close:
-                            spread_df.at[i, 'trend_up'] = up[i]
-                        else:
-                            spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
-                    else:  # тренд пробит, меняем линию на trend_up
-                        spread_df.at[i, 'trend'] = max(prev_trend_up, up[i])
-                        spread_df.at[i, 'switch'] = True
-                        spread_df.at[i, 'switch_to'] = 'up'
-                        # ####################
-                        spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
-                        spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
-                else:
-                    print('Да ну блин!!!')
+            # else:
+            #     # значит тренд не изменился, что бы определить направление, смотрим на 2 свечи назад
+            #     if spread_df.iloc[i - 2]['trend'] < spread_df.iloc[i-2]['close']:  # был тренд вверх
+            #         if prev_trend <= close:  # пробития тренда не было, значит тренд остается
+            #             spread_df.at[i, 'trend'] = max(prev_trend, up[i])
+            #             # ####################
+            #             spread_df.at[i, 'trend_up'] = max(prev_trend, up[i])
+            #             if prev_trend_down < close:
+            #                 spread_df.at[i, 'trend_down'] = dn[i]
+            #             else:
+            #                 spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
+            #         else:
+            #             # тренд пробит, меняем линию
+            #             spread_df.at[i, 'trend'] = min(prev_trend_down, dn[i])
+            #             spread_df.at[i, 'switch'] = True
+            #             spread_df.at[i, 'switch_to'] = 'down'
+            #             # ####################
+            #             spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
+            #             spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
+            #     elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']: # был тренд вниз
+            #         if prev_trend >= close:  # пробития тренда не было, значит тренд остается
+            #             spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
+            #             # ####################
+            #             spread_df.at[i, 'trend_down'] = min(prev_trend, dn[i])
+            #             if prev_trend_up > close:
+            #                 spread_df.at[i, 'trend_up'] = up[i]
+            #             else:
+            #                 spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
+            #         else:  # тренд пробит, меняем линию на trend_up
+            #             spread_df.at[i, 'trend'] = max(prev_trend_up, up[i])
+            #             spread_df.at[i, 'switch'] = True
+            #             spread_df.at[i, 'switch_to'] = 'up'
+            #             # ####################
+            #             spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
+            #             spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
+            #     else:
+            #         print('Да ну блин!!!')
 
     return spread_df
 
