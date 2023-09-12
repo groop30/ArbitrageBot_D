@@ -77,7 +77,7 @@ def check_for_open():
         history_df = modul.convert_to_tf(history_df, 900) #15 min timeframe
 
         history_df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
-        history_df = modul.pivot_point_supertrend(history_df, 2, 3, 10)
+        history_df = ind.pivot_point_supertrend(history_df, 2, 3, 10)
 
         last_row = history_df.tail(1)
         # получим данные последней строки
