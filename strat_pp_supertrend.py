@@ -72,6 +72,7 @@ def check_for_open():
         if len(opened_coin) > 0:
             # значит есть другие позиции, не открываем.
             in_position = True
+            continue
 
         history_df = modul.get_sql_history_price(future, connection, start_date, end_date)
         history_df = modul.convert_to_tf(history_df, 900) #15 min timeframe
@@ -88,29 +89,6 @@ def check_for_open():
         )
 
         check_df = history_df.copy()
-
-        # Исходная версия
-        # # сначала смотрим условия для открытия позиции
-        # if (not in_position) and l_switch:
-        #     # Проверяем на условие первого входа
-        #     if l_switch_to == 'up':
-        #         # переключились на растущий тренд, смотрим два предыдущих
-        #         check_df = check_df[check_df['switch_to'] == 'up']
-        #         if len(check_df) > 1:
-        #             if l_trend > check_df.iloc[-1]['trend'] > check_df.iloc[-2]['trend']:
-        #                 # текущий тренд - третий подряд растущий, открываем позицию лонг
-        #                 open_position("signal", future, future, '', strategy, 'UP', l_price, 0,
-        #                               0.0, True, 0.0, 0.0, l_time)
-        #
-        #     else:
-        #         # переключились на падающий тренд, смотрим два предыдущих
-        #         check_df = check_df[check_df['switch_to'] == 'down']
-        #
-        #         if len(check_df) > 1:
-        #             if l_trend < check_df.iloc[-1]['trend'] < check_df.iloc[-2]['trend']:
-        #                 # текущий тренд - третий подряд падающий, открываем позицию шорт
-        #                 open_position("signal", future, future, '', strategy, 'DOWN', l_price, 0,
-        #                               0.0, True, 0.0, 0.0, l_time)
 
         # Версия 2.
         if (not in_position) and l_switch:
