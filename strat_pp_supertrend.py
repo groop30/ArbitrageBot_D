@@ -61,7 +61,7 @@ def check_for_open():
         future = all_futures[i]
         end_date = datetime.datetime.now().timestamp()
         # end_date = datetime.datetime(2023, 8, 28, 0, 30, 0).timestamp()
-        start_date = end_date - 600*tf_5m
+        start_date = end_date - 1800*tf_5m
         with connection.connect() as conn:
             to_close_df = pd.read_sql(sql=query_close, con=conn)
             to_close_df = to_close_df[to_close_df['strategy'] == strategy]
