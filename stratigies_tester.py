@@ -21,14 +21,11 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
     close = spread_df['close']
     # Calculate pivots
     pivot_high_series, pivot_low_series = ind.williams_fractals(spread_df, pp_prd)
-
     pivot_high_values = np.where(pivot_high_series, spread_df['high'], False)
     pivot_low_values = np.where(pivot_low_series, spread_df['low'], False)
-
     all_pivots = np.where(pivot_high_values, pivot_high_values, pivot_low_values)
     pd.Series(all_pivots).replace(0, np.nan, inplace=True)
-    # filled_center = pd.Series(center).fillna(method='ffill')
-    # spread_df['center'] = pd.Series(filled_center).rolling(2).apply(lambda x: (x[-1] * 2 + x[0]) / 3, raw=True)
+
     spread_df['pivots'] = all_pivots
     spread_df['center'] = np.nan
     # time_1_loop1 = datetime.datetime.now()
@@ -45,20 +42,11 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
             else:
                 spread_df.at[i, 'center'] = pivot_now
 
-    # time_1_loop2 = datetime.datetime.now()
-    # print(f'first loop takes {(time_1_loop2 - time_1_loop1).seconds}')
     # Upper/lower bands calculation
     atr = talib.ATR(high, low, close, timeperiod=atr_prd)
     up = spread_df['center'] - (atr_factor * atr)
     dn = spread_df['center'] + (atr_factor * atr)
 
-    # # Get the trend - подумать, как сделать без цикла...
-    # trend = talib.MAX(close, timeperiod=prd)
-    # trend = np.where(close < talib.MAX(close.shift(), timeperiod=prd), -1, trend)
-    # spread_df['trend_down'] = np.where(close > dn, -1, dn)
-    # spread_df['trend_down'] = np.where((spread_df['trend_down'].shift() < dn)&(spread_df['trend_down']!=-1), spread_df['trend_down'], dn)
-    # trend_up = pd.Series(np.where(close < up , -1, up))
-    # spread_df['trend_up'] = pd.Series(np.where(trend_up.shift() > up, trend_up, up))
     spread_df['trend'] = np.nan
     spread_df['trend_up'] = np.nan
     spread_df['trend_down'] = np.nan
@@ -599,9 +587,9 @@ def single_strategy_testing(start_time, end_time):
         future = all_futures.iloc[i]["id"]
         # future = all_futures[i]
         print(f'Тестируем монету {future}')
-        # df = test_strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
+        df = test_strategy_pp_supertrend(future, start_time, end_time, 2, 3, 10)
         # df = strategy_pp_supertrend_v2(future, start_time, end_time, 2, 3, 10)
-        df = strategy_pp_supertrend_v3(future, start_time, end_time, 2, 3, 10)
+        # df = strategy_pp_supertrend_v3(future, start_time, end_time, 2, 3, 10)
         if len(df) > 0:
             df['coin'] = future
             df['link'] = f'BINANCE:{future}.P'
@@ -2877,9 +2865,9 @@ def flat_filter(df, direction):
 
 def strategy_pp_supertrend_v3(coin1, start_date, end_date, pp_prd, atr_factor, atr_prd):
 
-    start_date = start_date - 500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
+    start_date = start_date - 1500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
     spread_df = modul.get_sql_history_price(coin1, connection, start_date, end_date)
-    # spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
+    spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
     if len(spread_df) == 0:
         return pd.DataFrame()
 
@@ -3022,7 +3010,7 @@ def test_strategy_pp_supertrend(coin1, start_date, end_date, pp_prd, atr_factor,
     """
     start_date = start_date - 500 * tf_5m  # для того, что бы расчет стратегии начался с правильных показаний индик.
     spread_df = modul.get_sql_history_price(coin1, connection, start_date, end_date)
-    spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
+    # spread_df = modul.convert_to_tf(spread_df, 900) #15 min timeframe
     if len(spread_df) == 0:
         return pd.DataFrame()
 
@@ -3163,6 +3151,7 @@ def test_strategy_moex_pp_supertrend(coin1, start_date, end_date, alor_connectio
     result_df = df = pd.DataFrame()
 
     spread_df = ind.pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
+    # spread_df2 = pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd)
     in_position = False
     last_short = last_long = 0.0
     mae = mfe = 0.0
@@ -3288,8 +3277,8 @@ if __name__ == '__main__':
     # strategy_pp_supertrend_v3('1000XECUSDT', start_time, end_time, 2, 3, 10)
     # check_list_for_strategies(start_time, end_time, 5, 240)
 
-    start_time = datetime.datetime(2023, 8, 1, 0, 0, 0).timestamp()
-    end_time = datetime.datetime(2023, 9, 1, 0, 0, 0).timestamp()
+    start_time = datetime.datetime(2023, 6, 1, 0, 0, 0).timestamp()
+    end_time = datetime.datetime(2023,7, 1, 0, 0, 0).timestamp()
     # walk_forward_scaning(start_time, end_time, 9000, 3, 'only_coint')
     # walk_forward_testing(start_time, end_time, 9000, 3, 1000, 'only_coint')
     # walk_forward_testing(start_time, end_time, 2000, 2, 1000, 'only_coint')
