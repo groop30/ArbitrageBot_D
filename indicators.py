@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import talib
+import datetime
 
 
 def williams_fractals(df, n):
@@ -47,142 +48,117 @@ def pivot_point_supertrend(spread_df, pp_prd, atr_factor, atr_prd):
 
     pivot_high_values = np.where(pivot_high_series, spread_df['high'], False)
     pivot_low_values = np.where(pivot_low_series, spread_df['low'], False)
-
     all_pivots = np.where(pivot_high_values, pivot_high_values, pivot_low_values)
     pd.Series(all_pivots).replace(0, np.nan, inplace=True)
 
     spread_df['pivots'] = all_pivots
-    spread_df['center'] = np.nan
+    list_res = []
+    for k in range(pp_prd+1):
+        list_res.append(np.nan)
+
     for i in range((pp_prd+1), len(all_pivots)):
         pivot_now = all_pivots[i - pp_prd]
         if not pd.isna(pivot_now):
-            if not pd.isna(spread_df.iloc[i-1]['center']):
-                spread_df.at[i, 'center'] = (spread_df.iloc[i - 1]['center'] * 2 + pivot_now) / 3
+            if not pd.isna(list_res[-1]):
+                list_res.append((list_res[-1] * 2 + pivot_now) / 3)
             else:
-                spread_df.at[i, 'center'] = pivot_now
+                list_res.append(pivot_now)
         else:
-            if not pd.isna(spread_df.iloc[i - 1]['center']):
-                spread_df.at[i, 'center'] = spread_df.iloc[i - 1]['center']
+            if not pd.isna(list_res[-1]):
+                list_res.append(list_res[-1])
             else:
-                spread_df.at[i, 'center'] = pivot_now
+                list_res.append(pivot_now)
+
+    spread_df['center'] = pd.DataFrame(list_res)
 
     # Upper/lower bands calculation
     atr = talib.ATR(high, low, close, timeperiod=atr_prd)
     up = spread_df['center'] - (atr_factor * atr)
     dn = spread_df['center'] + (atr_factor * atr)
 
-    # # Get the trend - подумать, как сделать без цикла...
-    spread_df['trend'] = np.nan
-    spread_df['trend_up'] = np.nan
-    spread_df['trend_down'] = np.nan
-    spread_df['switch'] = False
-    spread_df['switch_to'] = ''
-    trend_now = ''
-    for i in range(atr_prd, len(spread_df)):
-        prev_trend = spread_df.iloc[i - 1]['trend']
-        prev_trend_down = spread_df.iloc[i - 1]['trend_down']
-        prev_trend_up = spread_df.iloc[i-1]['trend_up']
-        prev_close = spread_df.iloc[i-1]['close']
+    l_trend = []
+    l_trend_up = []
+    l_trend_down = []
+    l_switch = []
+    l_switch_to = []
+    for k in range(atr_prd):
+        l_trend.append(np.nan)
+        l_trend_up.append(np.nan)
+        l_trend_down.append(np.nan)
+        l_switch.append(False)
+        l_switch_to.append('')
+
+    # задаем точку старта.
+    if spread_df.iloc[atr_prd]['close'] < up[atr_prd]:
+        l_trend.append(dn[atr_prd])
+        l_trend_up.append(up[atr_prd])
+        l_trend_down.append(dn[atr_prd])
+        l_switch_to.append('down')
+        trend_now = 'down'
+    else:
+        l_trend.append(up[atr_prd])
+        l_trend_up.append(up[atr_prd])
+        l_trend_down.append(dn[atr_prd])
+        l_switch_to.append('up')
+        trend_now = 'up'
+    l_switch.append(True)
+
+    for i in range(atr_prd+1, len(spread_df)):
+        prev_trend = l_trend[-1]
+        prev_trend_down = l_trend_down[-1]
+        prev_trend_up = l_trend_up[-1]
         close = spread_df.iloc[i]['close']
-        if pd.isna(prev_trend):
-            if close < up[i]:
-                spread_df.at[i, 'trend'] = dn[i]
-                spread_df.at[i, 'switch_to'] = 'down'
-                # ####################
-                spread_df.at[i, 'trend_down'] = dn[i]
-                spread_df.at[i, 'trend_up'] = up[i]
-                trend_now = 'down'
+
+        # смотрим предыдущие значения, что бы понять, какой был тренд
+        if trend_now == 'down':
+            # значит был тренд вниз (down)
+            if prev_trend >= close:
+                l_trend.append(min(prev_trend, dn[i]))
+                l_trend_down.append(min(prev_trend, dn[i]))
+                l_switch_to.append('')
+                l_switch.append(False)
+                if prev_trend_up > close:
+                    l_trend_up.append(up[i])
+                else:
+                    l_trend_up.append(max(prev_trend_up, up[i]))
             else:
-                spread_df.at[i, 'trend'] = up[i]
-                spread_df.at[i, 'switch_to'] = 'up'
-                # ####################
-                spread_df.at[i, 'trend_down'] = dn[i]
-                spread_df.at[i, 'trend_up'] = up[i]
+                # тренд пробит, меняем линию на trend_up
+                l_trend.append(max(prev_trend_up, up[i]))
+                l_switch.append(True)
+                l_switch_to.append('up')
+                l_trend_down.append(dn[i])  # не смысла смотреть min, точно знаем что цена пробила
+                l_trend_up.append(max(prev_trend_up, up[i]))
                 trend_now = 'up'
-            spread_df.at[i, 'switch'] = True
-
         else:
-            # смотрим предыдущие значения, что бы понять, какой был тренд
-            if trend_now == 'down':
-                # значит был тренд вниз (down)
-                if prev_trend >= close:
-                    # пробития тренда не было, значит тренд остается
-                    spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
-                    # ####################
-                    spread_df.at[i, 'trend_down'] = min(prev_trend, dn[i])
-                    if prev_trend_up > close:
-                        spread_df.at[i, 'trend_up'] = up[i]
-                    else:
-                        spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
+            # значит был тренд вверх
+            if prev_trend <= close:
+                # пробития тренда не было, значит тренд остается
+                l_trend.append(max(prev_trend, up[i]))
+                l_switch_to.append('')
+                l_switch.append(False)
+                l_trend_up.append(max(prev_trend, up[i]))
+                if prev_trend_down < close:
+                    l_trend_down.append(dn[i])
                 else:
-                    # тренд пробит, меняем линию на trend_up
-                    spread_df.at[i, 'trend'] = max(prev_trend_up, up[i])
-                    spread_df.at[i, 'switch'] = True
-                    spread_df.at[i, 'switch_to'] = 'up'
-                    trend_now = 'up'
-                    # ####################
-                    spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
-                    spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
-
+                    l_trend_down.append(min(prev_trend_down, dn[i]))
             else:
-                # значит был тренд вверх
-                if prev_trend <= close:
-                    # пробития тренда не было, значит тренд остается
-                    spread_df.at[i, 'trend'] = max(prev_trend, up[i])
-                    # ####################
-                    spread_df.at[i, 'trend_up'] = max(prev_trend, up[i])
-                    if prev_trend_down < close:
-                        spread_df.at[i, 'trend_down'] = dn[i]
-                    else:
-                        spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-                else:
-                    # тренд пробит, меняем линию
-                    spread_df.at[i, 'trend'] = min(prev_trend_down, dn[i])
-                    spread_df.at[i, 'switch'] = True
-                    spread_df.at[i, 'switch_to'] = 'down'
-                    trend_now = 'down'
-                    # ####################
-                    spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
-                    spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-            # else:
-            #     # значит тренд не изменился, что бы определить направление, смотрим на 2 свечи назад
-            #     if spread_df.iloc[i - 2]['trend'] < spread_df.iloc[i-2]['close']:  # был тренд вверх
-            #         if prev_trend <= close:  # пробития тренда не было, значит тренд остается
-            #             spread_df.at[i, 'trend'] = max(prev_trend, up[i])
-            #             # ####################
-            #             spread_df.at[i, 'trend_up'] = max(prev_trend, up[i])
-            #             if prev_trend_down < close:
-            #                 spread_df.at[i, 'trend_down'] = dn[i]
-            #             else:
-            #                 spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-            #         else:
-            #             # тренд пробит, меняем линию
-            #             spread_df.at[i, 'trend'] = min(prev_trend_down, dn[i])
-            #             spread_df.at[i, 'switch'] = True
-            #             spread_df.at[i, 'switch_to'] = 'down'
-            #             # ####################
-            #             spread_df.at[i, 'trend_up'] = up[i]  # не смысла смотреть max, точно знаем что цена пробила
-            #             spread_df.at[i, 'trend_down'] = min(prev_trend_down, dn[i])
-            #     elif spread_df.iloc[i - 2]['trend'] > spread_df.iloc[i-2]['close']: # был тренд вниз
-            #         if prev_trend >= close:  # пробития тренда не было, значит тренд остается
-            #             spread_df.at[i, 'trend'] = min(prev_trend, dn[i])
-            #             # ####################
-            #             spread_df.at[i, 'trend_down'] = min(prev_trend, dn[i])
-            #             if prev_trend_up > close:
-            #                 spread_df.at[i, 'trend_up'] = up[i]
-            #             else:
-            #                 spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
-            #         else:  # тренд пробит, меняем линию на trend_up
-            #             spread_df.at[i, 'trend'] = max(prev_trend_up, up[i])
-            #             spread_df.at[i, 'switch'] = True
-            #             spread_df.at[i, 'switch_to'] = 'up'
-            #             # ####################
-            #             spread_df.at[i, 'trend_down'] = dn[i]  # не смысла смотреть min, точно знаем что цена пробила
-            #             spread_df.at[i, 'trend_up'] = max(prev_trend_up, up[i])
-            #     else:
-            #         print('Да ну блин!!!')
+                # тренд пробит, меняем линию
+                l_trend.append(min(prev_trend_down, dn[i]))
+                l_switch.append(True)
+                l_switch_to.append('down')
+                l_trend_up.append(up[i])  # не смысла смотреть max, точно знаем что цена пробила
+                l_trend_down.append(min(prev_trend_down, dn[i]))
+                trend_now = 'down'
 
+    spread_df['trend'] = pd.DataFrame(l_trend)
+    spread_df['trend_up'] = pd.DataFrame(l_trend_up)
+    spread_df['trend_down'] = pd.DataFrame(l_trend_down)
+    spread_df['switch'] = pd.DataFrame(l_switch)
+    spread_df['switch_to'] = pd.DataFrame(l_switch_to)
+    # start3 = datetime.datetime.now()
+    # print(f'time1={start2-start1}, and time2={start3 - start2}')
     return spread_df
+
 
 def zscore_calculating(df, lookback):
 
