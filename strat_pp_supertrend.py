@@ -68,14 +68,12 @@ def check_for_open():
 
         # проверим отдельно по монетам, нет ли повторов
         opened_coin = to_close_df[(to_close_df['coin1'] == future)]
-        in_position = False
         if len(opened_coin) > 0:
             # значит есть другие позиции, не открываем.
-            in_position = True
             continue
 
         history_df = modul.get_sql_history_price(future, connection, start_date, end_date)
-        history_df = modul.convert_to_tf(history_df, 900) #15 min timeframe
+        history_df = modul.convert_to_tf(history_df, 900)  # 15 min timeframe
 
         history_df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
         history_df = ind.pivot_point_supertrend(history_df, 2, 3, 10)
@@ -91,7 +89,7 @@ def check_for_open():
         check_df = history_df.copy()
 
         # Версия 2.
-        if (not in_position) and l_switch:
+        if l_switch:
             # Проверяем на условие первого входа
             if l_switch_to == 'down':
                 # переключились на падающий тренд, смотрим два предыдущих
@@ -100,7 +98,8 @@ def check_for_open():
                 if len(check_df) > 1:
                     if trend_start > check_df.iloc[-2]['trend']:
                         if (history_df.iloc[-2]['trend'] - trend_start) / trend_start > 0.005:
-                            open_position(action, future, strategy, 'UP', l_price, 0, round(trend_start, 7), True, l_time)
+                            if l_price > trend_start:  # что бы после открытия сразу не отстопило
+                                open_position(action, future, strategy, 'UP', l_price, 0, round(trend_start, 7), True, l_time)
 
             else:
                 # переключились на растущий тренд, смотрим два предыдущих
@@ -109,7 +108,8 @@ def check_for_open():
                 if len(check_df) > 1:
                     if trend_start < check_df.iloc[-2]['trend']:
                         if (trend_start - history_df.iloc[-2]['trend']) / history_df.iloc[-2]['trend'] > 0.005:
-                            open_position(action, future, strategy, 'DOWN', l_price, 0, round(trend_start, 7), True, l_time)
+                            if l_price < trend_start:
+                                open_position(action, future, strategy, 'DOWN', l_price, 0, round(trend_start, 7), True, l_time)
 
         ########################################
         # Проверим, удалять ли из списка?
