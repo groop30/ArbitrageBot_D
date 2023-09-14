@@ -618,8 +618,8 @@ def single_strategy_testing_moex(start_time, end_time):
     #     list = alor_modul.fetch_securities_list(headers, sector)  # FORTS, FOND, CURR
     #     all_securites= list['symbol']
     # futures = ['CRU3', 'SIU3', 'EuU3', 'NGU3', 'BRU3', 'EDU3', 'GDU3', 'RIU3', 'MMU3', 'SVU3', 'GAZP', 'SBER', 'LKOH']  # экспир 9.23
-    futures = ['CRM3', 'SIM3', 'EuM3', 'NGM3', 'BRM3', 'EDM3', 'GDM3', 'RIM3', 'MMM3', 'SVM3', 'GAZP', 'SBER', 'LKOH']  # экспир 6.23
-    futures1 = ['CRH3', 'SIH3', 'EuH3', 'NGH3', 'BRH3', 'EDH3', 'GDH3', 'RIH3', 'MMH3', 'SVH3', 'GAZP', 'SBER', 'LKOH']  # экспир 3.23
+    # futures = ['CRM3', 'SIM3', 'EuM3', 'NGM3', 'BRM3', 'EDM3', 'GDM3', 'RIM3', 'MMM3', 'SVM3', 'GAZP', 'SBER', 'LKOH']  # экспир 6.23
+    futures = ['CRH3', 'SIH3', 'EuH3', 'NGH3', 'BRH3', 'EDH3', 'GDH3', 'RIH3', 'MMH3', 'SVH3', 'GAZP', 'SBER', 'LKOH']  # экспир 3.23
     # shares = []
     trades_df = pd.DataFrame()
     for asset in futures:
@@ -3294,8 +3294,8 @@ if __name__ == '__main__':
     # strategy_pp_supertrend_v3('1000XECUSDT', start_time, end_time, 2, 3, 10)
     # check_list_for_strategies(start_time, end_time, 5, 240)
 
-    start_time = datetime.datetime(2023, 3, 15, 0, 0, 0).timestamp()
-    end_time = datetime.datetime(2023, 6, 15, 0, 0, 0).timestamp()
+    start_time = datetime.datetime(2022, 12, 15, 0, 0, 0).timestamp()
+    end_time = datetime.datetime(2023, 3, 15, 0, 0, 0).timestamp()
     # walk_forward_scaning(start_time, end_time, 9000, 3, 'only_coint')
     # walk_forward_testing(start_time, end_time, 9000, 3, 1000, 'only_coint')
     # walk_forward_testing(start_time, end_time, 2000, 2, 1000, 'only_coint')

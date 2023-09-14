@@ -682,12 +682,15 @@ def check_for_close():
                                               new_row, True, exchange)
                     modul.update_check_df(connection, pair, 'action', 'waiting')  # Отключаем пару от торгов
         elif strategy == 'pp_supertrend':
+            df = modul.convert_to_tf(df, 900)  # 15 min timeframe
+            df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
+            df['bb_up_pp'], _, df['bb_down_pp'] = talib.BBANDS(df.close, 288, 3, 3, 0)
             if going_to == 'DOWN':
                 if stop < l_price:
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
+                elif l_price < df.iloc[-1]['bb_down_pp']:
+                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
-                    df = modul.convert_to_tf(df, 900)  # 15 min timeframe
-                    df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
                     df = ind.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'down']
                     if len(check_df) > 1:
@@ -698,9 +701,10 @@ def check_for_close():
             else:
                 if stop > l_price:
                     modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
+                elif l_price > df.iloc[-1]['bb_up_pp']:
+                    modul.close_single_position(connection, coin1_id, coin1, size1, l_price, new_row, True, exchange)
                 else:  # проверим, не пора ли передвигать стоп
-                    df = modul.convert_to_tf(df, 900)  # 15 min timeframe
-                    df.sort_values(by='time', ascending=True, inplace=True, ignore_index=True)
+
                     df = ind.pivot_point_supertrend(df, 2, 3, 10)
                     check_df = df[df['switch_to'] == 'up']
                     if len(check_df) > 1:
