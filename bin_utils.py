@@ -69,6 +69,12 @@ def send_message_to_telegram(text, channel):
                          chat_id='@team2alerts', text=text))
         except ValueError:
             print(f'Не получилась отправка сообщения в Telegram - {text}')
+    elif channel == 3:
+        try:
+            requests.get('https://api.telegram.org/bot{}/sendMessage'.format(key.team2_alerts_bot), params=dict(
+                chat_id='@t2_moex_alerts', text=text))
+        except ValueError:
+            print(f'Не получилась отправка сообщения в Telegram - {text}')
 
 
 # ######################################################################
@@ -838,6 +844,7 @@ def convert_to_tf(df, tf):
         multipl = 1
 
     df = df.resample(tf_str).apply(ohlc)
+    df = df[df['time'].notna()]
     df.reset_index(inplace=True)
     if tf != 300:
         this_minute = datetime.datetime.now().minute

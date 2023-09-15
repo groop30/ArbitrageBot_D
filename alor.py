@@ -122,7 +122,7 @@ def get_sql_history_price(asset, connection, start, end, headers):
 
     # 1. выбираем данные за нужный период из базы
     coin_table = create_olhcv_table(asset, connection)
-    query = coin_table.select().where(coin_table.columns.time >= start, coin_table.columns.time <= end)
+    query = coin_table.select().where(coin_table.columns.time >= int(start), coin_table.columns.time <= int(end))
     with connection.connect() as conn:
         history_df = pd.read_sql(sql=query, con=conn)
     # 2. смотрим, полные ли они, нужна ли дозагрузка

@@ -97,9 +97,10 @@ def check_for_open():
                 trend_start = check_df.iloc[-1]['trend']
                 if len(check_df) > 1:
                     if trend_start > check_df.iloc[-2]['trend']:
-                        if (history_df.iloc[-2]['trend'] - trend_start) / trend_start > 0.005:
-                            if l_price > trend_start:  # что бы после открытия сразу не отстопило
-                                open_position(action, future, strategy, 'UP', l_price, 0, round(trend_start, 7), True, l_time)
+                        # if (history_df.iloc[-2]['trend'] - trend_start) / trend_start > 0.005:
+                        #     if l_price > trend_start:  # что бы после открытия сразу не отстопило
+                        if (l_price - trend_start) / trend_start > 0.005:
+                            open_position(action, future, strategy, 'UP', l_price, 0, round(trend_start, 7), True, l_time)
 
             else:
                 # переключились на растущий тренд, смотрим два предыдущих
@@ -107,9 +108,10 @@ def check_for_open():
                 trend_start = check_df.iloc[-1]['trend']
                 if len(check_df) > 1:
                     if trend_start < check_df.iloc[-2]['trend']:
-                        if (trend_start - history_df.iloc[-2]['trend']) / history_df.iloc[-2]['trend'] > 0.005:
-                            if l_price < trend_start:
-                                open_position(action, future, strategy, 'DOWN', l_price, 0, round(trend_start, 7), True, l_time)
+                        # if (trend_start - history_df.iloc[-2]['trend']) / history_df.iloc[-2]['trend'] > 0.005:
+                        #     if l_price < trend_start:
+                        if (trend_start - l_price) / l_price > 0.005:
+                            open_position(action, future, strategy, 'DOWN', l_price, 0, round(trend_start, 7), True, l_time)
 
         ########################################
         # Проверим, удалять ли из списка?
