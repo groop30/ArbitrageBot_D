@@ -121,4 +121,4 @@ def check_for_open():
 
 while True:
     check_for_open()
-    time.sleep(15)
+    time.sleep(240)
