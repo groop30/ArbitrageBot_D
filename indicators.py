@@ -269,3 +269,76 @@ def get_max_deviation_from_sma(df, lookback):
         full_dev = pd.concat([full_dev, max_dev], axis=0, ignore_index=True)
 
     return full_dev
+
+
+def zigzag(data, pct=0.05):
+    depth = pct * data['high'].iloc[0]  # переведем процент в цену
+    zzH = np.zeros(len(data))
+    zzL = np.zeros(len(data))
+
+    direction = 1
+    last = 0
+
+    for i in range(1, len(data) - 1):
+        set_flag = False
+        zzL[i] = 0
+        zzH[i] = 0
+
+        if direction > 0:
+            # идем вверх, смотрим хаи
+            if data['high'].iloc[i] > zzH[last]:  # текущий хай выше предыдущего, перезаписываем
+                zzH[last] = 0
+                zzH[i] = data['high'].iloc[i]
+
+                if data['low'].iloc[i] < data['high'].iloc[last] - depth:
+                    # текущий лой ниже заданного процента
+                    if data['open'].iloc[i] < data['close'].iloc[i]:
+                        zzH[last] = data['high'].iloc[last]
+                    else:
+                        direction = -1
+                    zzL[i] = data['low'].iloc[i]
+
+                last = i
+                set_flag = True
+
+            if data['low'].iloc[i] < zzH[last] - depth and (not set_flag or data['open'].iloc[i] > data['close'].iloc[i]):
+                zzL[i] = data['low'].iloc[i]
+
+                if data['high'].iloc[i] > zzL[i] + depth and data['open'].iloc[i] < data['close'].iloc[i]:
+                    zzH[i] = data['high'].iloc[i]
+                else:
+                    direction = -1
+
+                last = i
+
+        else:
+            if data['low'].iloc[i] < zzL[last]:
+                zzL[last] = 0
+                zzL[i] = data['low'].iloc[i]
+
+                if data['high'].iloc[i] > data['low'].iloc[last] + depth:
+                    if data['open'].iloc[i] > data['close'].iloc[i]:
+                        zzL[last] = data['low'].iloc[last]
+                    else:
+                        direction = 1
+                    zzH[i] = data['high'].iloc[i]
+
+                last = i
+                set_flag = True
+
+            if data['high'].iloc[i] > zzL[last] + depth and (not set_flag or data['open'].iloc[i] < data['close'].iloc[i]):
+                zzH[i] = data['high'].iloc[i]
+
+                if data['low'].iloc[i] < zzH[i] - depth and data['open'].iloc[i] > data['close'].iloc[i]:
+                    zzL[i] = data['low'].iloc[i]
+                else:
+                    direction = 1
+
+                last = i
+
+    zzH[-1] = 0
+    zzL[-1] = 0
+
+    data['zzH'] = zzH
+    data['zzL'] = zzL
+    return data
