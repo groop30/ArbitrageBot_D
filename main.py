@@ -181,7 +181,7 @@ class App(QWidget):
             if pair != pair2:
                 print("Проверьте пару для закрытия! Отличается от выбранной в таблице!")
                 return False
-            coin2_id = int(coin2_id)
+            coin2_id = int(float(coin2_id))
             size2 = float(self.ui.tradingOpenPos.item(new_row, 12).text())
             coin1, coin2 = modul.pair_to_coins(pair)
             _, _, l_price = modul.get_last_spread_price(coin1, coin2)
