@@ -26,7 +26,7 @@ def send_alert(coin, going_to, l_price):
 def check_for_open():
 
     # all_futures = modul.get_all_futures()
-    all_futures =['CRU3', 'SIU3', 'EuU3', 'NGU3', 'BRU3', 'EDU3', 'GDU3', 'RIU3', 'MMU3', 'SVU3', 'GAZP', 'SBER', 'LKOH',
+    all_futures =['CRZ3', 'SIZ3', 'EuZ3', 'NGV3', 'BRV3', 'EDZ3', 'GDZ3', 'RIZ3', 'MMZ3', 'SVZ3', 'GAZP', 'SBER', 'LKOH',
                   'TRNFP', 'VTBR', 'ROLO', 'MGNT', 'MOEX', 'GMKN', 'YNDX', 'ROSN', 'CHMF', 'TATN', 'ALRS', 'SNGSP', 'NVTK',
                   'QIWI', 'MTLR', 'NLMK', 'PIKK', 'MAGN', 'PHOR', 'NMTP', 'IRAO', 'MTSS', 'SBERP', 'HYDR', 'RUAL', 'AGRO', 'SNGS', 'AFKS']
 
@@ -82,4 +82,4 @@ def check_for_open():
 
 while True:
     check_for_open()
-    time.sleep(15)
+    time.sleep(240)
